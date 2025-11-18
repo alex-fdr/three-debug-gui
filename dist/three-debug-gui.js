@@ -1,32 +1,24 @@
-var u = Object.defineProperty;
-var w = (c, e, t) => e in c ? u(c, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : c[e] = t;
-var i = (c, e, t) => w(c, typeof e != "symbol" ? e + "" : e, t);
-import p from "lil-gui";
-import { FrontSide as g, BackSide as y, DoubleSide as S, MeshLambertMaterial as C, MeshBasicMaterial as x, MeshPhongMaterial as b, MeshStandardMaterial as T, ClampToEdgeWrapping as P, RepeatWrapping as L, MirroredRepeatWrapping as M, Raycaster as v, Vector2 as E } from "three";
-import { OrbitControls as A } from "three/addons/controls/OrbitControls";
-import { TransformControls as O } from "three/addons/controls/TransformControls";
-class k {
-  constructor() {
-    i(this, "controls");
-  }
+import h from "lil-gui";
+import { DoubleSide as d, BackSide as p, FrontSide as f, MeshLambertMaterial as m, MeshBasicMaterial as u, MeshPhongMaterial as w, MeshStandardMaterial as g, MirroredRepeatWrapping as y, RepeatWrapping as S, ClampToEdgeWrapping as b, Raycaster as C, Vector2 as x } from "three";
+import { OrbitControls as T } from "three/addons/controls/OrbitControls";
+import { TransformControls as P } from "three/addons/controls/TransformControls";
+class L {
+  controls;
   action({ camera: e, renderer: t }) {
-    this.controls = new A(e, t.domElement), this.controls.update();
+    this.controls = new T(e, t.domElement), this.controls.update();
   }
   toggle(e, t) {
     this.controls || this.action(t), this.controls.enabled = e;
   }
   update(e) {
-    var t;
-    (t = this.controls) == null || t.update(e);
+    this.controls?.update(e);
   }
 }
-class j {
-  constructor() {
-    i(this, "activeObjectUuid", "");
-    i(this, "panel");
-  }
+class A {
+  activeObjectUuid = "";
+  panel;
   createPanel() {
-    return new p({ title: "Object Props", width: 200 });
+    return new h({ title: "Object Props", width: 200 });
   }
   adjustPlacement(e) {
     this.panel || (this.panel = this.createPanel(), this.panel.hide()), this.panel.domElement.style.right = e ? "200px" : "0px";
@@ -56,8 +48,8 @@ class j {
   parseObject(e) {
     if ("isLight" in e && this.showLightProps(e), "material" in e) {
       const { material: t } = e, s = Array.isArray(t) ? t : [t];
-      for (const [o, n] of s.entries())
-        this.showMaterialProps(e, n, o);
+      for (const [n, o] of s.entries())
+        this.showMaterialProps(e, o, n);
     }
     e.children.length && this.showGroupProps(e);
   }
@@ -65,26 +57,25 @@ class j {
     this.handleColor(this.panel, e, "color"), this.handleColor(this.panel, e, "groundColor"), this.panel.add(e, "intensity", 0, 3, 0.1);
   }
   showMaterialProps(e, t, s) {
-    var r;
-    const o = s > 0 ? `Material${s}` : "Material", n = this.panel.addFolder(o);
-    n.add(t, "type"), n.add(e, "visible"), this.handleColor(n, t, "color"), this.handleColor(n, t, "emissive"), this.handleColor(n, t, "specular"), n.add(t, "transparent"), n.add(t, "opacity", 0, 1), n.add(t, "side", { FrontSide: g, BackSide: y, DoubleSide: S }).onChange((h) => t.side = h), (t instanceof C || t instanceof x || t instanceof b || t instanceof T) && (Object.hasOwn(t, "wireframe") && n.add(t, "wireframe"), (r = t.color) != null && r.getHex() && (this.handleFunction(
-      n,
+    const n = s > 0 ? `Material${s}` : "Material", o = this.panel.addFolder(n);
+    o.add(t, "type"), o.add(e, "visible"), this.handleColor(o, t, "color"), this.handleColor(o, t, "emissive"), this.handleColor(o, t, "specular"), o.add(t, "transparent"), o.add(t, "opacity", 0, 1), o.add(t, "side", { FrontSide: f, BackSide: p, DoubleSide: d }).onChange((i) => t.side = i), (t instanceof m || t instanceof u || t instanceof w || t instanceof g) && (Object.hasOwn(t, "wireframe") && o.add(t, "wireframe"), t.color?.getHex() && (this.handleFunction(
+      o,
       "LinearToSRGB",
       () => t.color.convertLinearToSRGB()
     ), this.handleFunction(
-      n,
+      o,
       "SRGBToLinear",
       () => t.color.convertSRGBToLinear()
-    )), this.showMaterialTextureProps(n, t));
+    )), this.showMaterialTextureProps(o, t));
   }
   showMaterialTextureProps(e, t) {
-    const s = e.addFolder("Texture"), o = t.map;
-    o && (s.add(o, "flipY"), s.add(o, "rotation").min(0).max(Math.PI * 2).step(0.01), s.add(o.offset, "x").name("offsetX").min(0).max(1).step(0.01), s.add(o.offset, "y").name("offsetY").min(0).max(1).step(0.01), s.add(o.repeat, "x").name("repeatX"), s.add(o.repeat, "y").name("repeatY"), s.add(o, "wrapS", {
-      ClampToEdgeWrapping: P,
-      RepeatWrapping: L,
-      MirroredRepeatWrapping: M
-    }).onChange((n) => {
-      o.wrapS = n, o.wrapT = n, o.needsUpdate = !0;
+    const s = e.addFolder("Texture"), n = t.map;
+    n && (s.add(n, "flipY"), s.add(n, "rotation").min(0).max(Math.PI * 2).step(0.01), s.add(n.offset, "x").name("offsetX").min(0).max(1).step(0.01), s.add(n.offset, "y").name("offsetY").min(0).max(1).step(0.01), s.add(n.repeat, "x").name("repeatX"), s.add(n.repeat, "y").name("repeatY"), s.add(n, "wrapS", {
+      ClampToEdgeWrapping: b,
+      RepeatWrapping: S,
+      MirroredRepeatWrapping: y
+    }).onChange((o) => {
+      n.wrapS = o, n.wrapT = o, n.needsUpdate = !0;
     }).name("wrap"));
   }
   showGroupProps(e) {
@@ -93,25 +84,25 @@ class j {
   handleColor(e, t, s) {
     if (!t[s])
       return;
-    const o = { [s]: t[s].getHex() };
-    e.addColor(o, s).onChange((n) => t[s].set(n));
+    const n = { [s]: t[s].getHex() };
+    e.addColor(n, s).onChange((o) => t[s].set(o));
   }
   handleFunction(e, t, s) {
-    const o = { fn: () => s() };
-    e.add(o, "fn").name(t);
+    const n = { fn: () => s() };
+    e.add(n, "fn").name(t);
   }
 }
-class z {
+class M {
+  exclude = ["transform-controls", "TransformControlsGizmo"];
+  keepClosed = ["mixamorig_Hips"];
+  lightsFolder;
+  panel;
+  onActionComplete;
   constructor(e) {
-    i(this, "exclude", ["transform-controls", "TransformControlsGizmo"]);
-    i(this, "keepClosed", ["mixamorig_Hips"]);
-    i(this, "lightsFolder");
-    i(this, "panel");
-    i(this, "onActionComplete");
     this.onActionComplete = e;
   }
   action(e) {
-    this.panel = new p({ title: "Scene Tree", width: 200 }), this.panel.domElement.style.right = "0px", this.lightsFolder = this.panel.addFolder("Lights"), this.tweakPanelStyle();
+    this.panel = new h({ title: "Scene Tree", width: 200 }), this.panel.domElement.style.right = "0px", this.lightsFolder = this.panel.addFolder("Lights"), this.tweakPanelStyle();
     for (const t of e.scene.children)
       this.traverseScene(t, this.panel);
   }
@@ -136,37 +127,36 @@ class z {
     const s = e.name !== "" ? e.name : e.type;
     if (this.exclude.includes(s))
       return;
-    const o = "isLight" in e && e.isLight, n = "isMesh" in e && e.isMesh, h = (o ? this.lightsFolder : t).addFolder(s), a = h.domElement.querySelector(".lil-title");
-    a == null || a.addEventListener("click", () => {
-      var l;
-      (l = this.onActionComplete) == null || l.call(this, e, s);
-    }), (this.keepClosed.includes(s) || o || n) && h.close();
-    for (const l of e.children)
-      this.traverseScene(l, h);
+    const n = "isLight" in e && e.isLight, o = "isMesh" in e && e.isMesh, a = (n ? this.lightsFolder : t).addFolder(s);
+    a.domElement.querySelector(".lil-title")?.addEventListener("click", () => {
+      this.onActionComplete?.(e, s);
+    }), (this.keepClosed.includes(s) || n || o) && a.close();
+    for (const c of e.children)
+      this.traverseScene(c, a);
   }
   toggle(e, t) {
     this.panel || this.action(t), this.panel.show(e), t.components.props.adjustPlacement(e);
   }
 }
-class X {
+class v {
+  onActionComplete;
+  controls;
+  isShiftPressed = !1;
+  camera;
+  actions;
+  keymap;
+  selectable = [];
+  intersected = null;
+  raycaster = new C();
+  pointer = new x();
+  excludeTypes = ["LineSegments", "DirectionalLight", "HemisphereLight", "Line"];
   constructor(e) {
-    i(this, "onActionComplete");
-    i(this, "controls");
-    i(this, "isShiftPressed", !1);
-    i(this, "camera");
-    i(this, "actions");
-    i(this, "keymap");
-    i(this, "selectable", []);
-    i(this, "intersected", null);
-    i(this, "raycaster", new v());
-    i(this, "pointer", new E());
-    i(this, "excludeTypes", ["LineSegments", "DirectionalLight", "HemisphereLight", "Line"]);
     this.onActionComplete = e;
   }
-  action({ camera: e, renderer: t, scene: s, components: o }) {
-    this.camera = e, this.controls = new O(e, t.domElement);
-    const n = this.controls.getHelper();
-    n.name = "transform-controls", s.add(n), this.actions = this.initActionsList(this.controls), this.keymap = this.initKeymap(this.actions), this.selectable = s.children.filter(({ type: r }) => !this.excludeTypes.includes(r)).filter(({ children: r }) => r.every((h) => h.type !== "Line")).filter(({ name: r }) => r !== "transform-controls"), this.bindEvents(o.orbit);
+  action({ camera: e, renderer: t, scene: s, components: n }) {
+    this.camera = e, this.controls = new P(e, t.domElement);
+    const o = this.controls.getHelper();
+    o.name = "transform-controls", s.add(o), this.actions = this.initActionsList(this.controls), this.keymap = this.initKeymap(this.actions), this.selectable = s.children.filter(({ type: i }) => !this.excludeTypes.includes(i)).filter(({ children: i }) => i.every((a) => a.type !== "Line")).filter(({ name: i }) => i !== "transform-controls"), this.bindEvents(n.orbit);
   }
   initActionsList(e) {
     return {
@@ -228,49 +218,44 @@ class X {
     };
   }
   bindEvents(e) {
-    var r, h;
-    (r = this.controls) == null || r.addEventListener("mouseUp", () => {
-      var a, l;
-      (l = this.onActionComplete) == null || l.call(this, (a = this.controls) == null ? void 0 : a.object);
-    }), (h = this.controls) == null || h.addEventListener("dragging-changed", (a) => {
-      e != null && e.controls && (e.controls.enabled = !a.value);
-    }), window.addEventListener("keydown", (a) => {
-      var f, m;
-      const l = a.key.toLowerCase(), d = l === "shift";
-      (m = (f = this.keymap)[l]) == null || m.call(f, d);
-    }), window.addEventListener("keyup", (a) => {
-      var d;
-      const l = a.key.toLowerCase();
-      l === "shift" && ((d = this.keymap) == null || d[l](!1));
+    this.controls?.addEventListener("mouseUp", () => {
+      this.onActionComplete?.(this.controls?.object);
+    }), this.controls?.addEventListener("dragging-changed", (i) => {
+      e?.controls && (e.controls.enabled = !i.value);
+    }), window.addEventListener("keydown", (i) => {
+      const a = i.key.toLowerCase(), l = a === "shift";
+      this.keymap[a]?.(l);
+    }), window.addEventListener("keyup", (i) => {
+      const a = i.key.toLowerCase();
+      a === "shift" && this.keymap?.[a](!1);
     });
-    const t = "ontouchstart" in document.documentElement, s = window.navigator.maxTouchPoints >= 1, n = t || s ? "touchstart" : "mousedown";
-    window.addEventListener(n, (a) => {
-      this.handleClick(a instanceof TouchEvent ? a.changedTouches[0] : a);
+    const t = "ontouchstart" in document.documentElement, s = window.navigator.maxTouchPoints >= 1, o = t || s ? "touchstart" : "mousedown";
+    window.addEventListener(o, (i) => {
+      this.handleClick(i instanceof TouchEvent ? i.changedTouches[0] : i);
     });
   }
   handleClick(e) {
-    var s, o;
-    if (!((s = this.controls) != null && s.enabled) || !this.isShiftPressed)
+    if (!this.controls?.enabled || !this.isShiftPressed)
       return;
     this.pointer.x = e.clientX / window.innerWidth * 2 - 1, this.pointer.y = -(e.clientY / window.innerHeight) * 2 + 1, this.raycaster.setFromCamera(this.pointer, this.camera);
     const [t] = this.raycaster.intersectObjects(
       this.selectable,
       !0
     );
-    t && t.object !== this.intersected && (this.intersected = t.object), this.intersected && (this.controls.attach(this.intersected), (o = this.onActionComplete) == null || o.call(this, this.intersected));
+    t && t.object !== this.intersected && (this.intersected = t.object), this.intersected && (this.controls.attach(this.intersected), this.onActionComplete?.(this.intersected));
   }
   toggle(e, t) {
     this.controls || this.action(t), this.controls && (this.controls.enabled = e, this.controls.detach());
   }
 }
-class F {
+class E {
+  options;
+  components;
+  panel;
+  scene;
+  renderer;
+  camera;
   constructor() {
-    i(this, "options");
-    i(this, "components");
-    i(this, "panel");
-    i(this, "scene");
-    i(this, "renderer");
-    i(this, "camera");
     this.options = {
       scene: !1,
       props: !1,
@@ -279,17 +264,16 @@ class F {
       // physics: false,
     };
   }
-  init({ scene: e, renderer: t, camera: s }, o = {}) {
-    var n, r;
+  init({ scene: e, renderer: t, camera: s }, n = {}) {
     if (!this.panel) {
-      this.scene = e, this.renderer = t, this.camera = s, this.options = { ...this.options, ...o }, this.panel = new p({ width: 100, title: "Debug" }), this.panel.domElement.setAttribute("id", "debug-panel"), this.components = {
-        props: new j(),
-        orbit: new k(),
-        scene: new z(this.onSceneAction.bind(this)),
-        transform: new X(this.onTransformAction.bind(this))
+      this.scene = e, this.renderer = t, this.camera = s, this.options = { ...this.options, ...n }, this.panel = new h({ width: 100, title: "Debug" }), this.panel.domElement.setAttribute("id", "debug-panel"), this.components = {
+        props: new A(),
+        orbit: new L(),
+        scene: new M(this.onSceneAction.bind(this)),
+        transform: new v(this.onTransformAction.bind(this))
       };
-      for (const h of Object.keys(this.options))
-        this.createToggle(h), this.options[h] && ((r = (n = this.components[h]) == null ? void 0 : n.action) == null || r.call(n, this));
+      for (const o of Object.keys(this.options))
+        this.createToggle(o), this.options[o] && this.components[o]?.action?.(this);
       this.tweakPanelStyle();
     }
   }
@@ -307,8 +291,7 @@ class F {
   }
   createToggle(e) {
     this.panel.add(this.options, e).onChange((t) => {
-      var s;
-      this.options[e] = t, (s = this.components[e]) == null || s.toggle(t, this);
+      this.options[e] = t, this.components[e]?.toggle(t, this);
     });
   }
   addCustomToggle({ label: e, handler: t, initialValue: s = !1 }) {
@@ -317,16 +300,14 @@ class F {
       return;
     }
     this.options[e] = s, this.components[e] = {
-      toggle: (o) => t(o)
+      toggle: (n) => t(n)
     }, this.createToggle(e);
   }
   registerComponent({ label: e, instance: t, initialValue: s = !1 }) {
-    var o;
-    this.options[e] = s, this.components[e] = t, this.createToggle(e), s === !0 && ((o = t.action) == null || o.call(t, this));
+    this.options[e] = s, this.components[e] = t, this.createToggle(e), s === !0 && t.action?.(this);
   }
   onSceneAction(e) {
-    var t;
-    this.components.props.action(this, e), (t = this.components.transform.controls) == null || t.attach(e), this.logObject(e);
+    this.components.props.action(this, e), this.components.transform.controls?.attach(e), this.logObject(e);
   }
   onTransformAction(e) {
     this.components.props.action(this, e), this.logObject(e);
@@ -336,12 +317,11 @@ class F {
 `), console.log("target:   ", e), console.log("position: ", e.position), console.log("rotation: ", e.rotation), console.log("scale:    ", e.scale));
   }
   update(e) {
-    var t, s, o, n;
-    (s = (t = this.components.orbit).update) == null || s.call(t, e), (n = (o = this.components.physics) == null ? void 0 : o.update) == null || n.call(o);
+    this.components.orbit.update?.(e), this.components.physics?.update?.();
   }
 }
-const H = new F();
+const X = new E();
 export {
-  F as Debug,
-  H as debug
+  E as Debug,
+  X as debug
 };
