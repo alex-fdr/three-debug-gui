@@ -11,7 +11,12 @@ export default defineConfig({
             formats: ['es'],
         },
         rollupOptions: {
-            external: ['three']
+            external: [
+                'three', 
+                'three/addons/controls/OrbitControls',
+                'three/addons/controls/TransformControls',
+                'lil-gui'
+            ]
         },
         reportCompressedSize: false,
     },
