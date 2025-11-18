@@ -1,9 +1,7 @@
 import GUI from 'lil-gui';
-import type { World } from 'cannon-es';
-import type { Object3D, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { Object3D, type PerspectiveCamera, type Scene, type WebGLRenderer } from 'three';
 import { DebugOrbitControls } from './debug-orbit-controls.ts';
 import { DebugObjectProps } from './debug-object-props.ts';
-import { DebugPhysics } from './debug-physics.ts';
 import { DebugSceneTree } from './debug-scene-tree.ts';
 import { DebugTransform } from './debug-transform.ts';
 
@@ -18,7 +16,7 @@ type Options = {
     props: boolean;
     transform: boolean;
     orbit: boolean;
-    physics: boolean;
+    // physics: boolean;
     [key: string]: boolean;
 };
 
@@ -26,9 +24,6 @@ type CoreSystems = {
     scene: Scene;
     camera: PerspectiveCamera;
     renderer: WebGLRenderer;
-    physics?: {
-        world: World;
-    };
 };
 
 type CustomToggle = {
@@ -37,17 +32,25 @@ type CustomToggle = {
     handler: (status: boolean) => void;
 };
 
+export type CustomComponent = {
+    label: string;
+    initialValue: boolean;
+    instance: DebugComponent;
+};
+
 export class Debug {
     options: Options;
     components!: {
-        [K in keyof Options]: DebugComponent
+        scene: DebugSceneTree;
+        props: DebugObjectProps;
+        transform: DebugTransform;
+        orbit: DebugOrbitControls;
+        [key: string]: DebugComponent;
     };
-
     panel!: GUI;
     scene!: Scene;
     renderer!: WebGLRenderer;
     camera!: PerspectiveCamera;
-    physics?: CoreSystems['physics'];
 
     constructor() {
         this.options = {
@@ -55,11 +58,11 @@ export class Debug {
             props: false,
             transform: false,
             orbit: false,
-            physics: false,
+            // physics: false,
         };
     }
 
-    init({ scene, renderer, camera, physics }: CoreSystems, props = {}) {
+    init({ scene, renderer, camera }: CoreSystems, props = {}) {
         if (this.panel) {
             return;
         }
@@ -67,7 +70,6 @@ export class Debug {
         this.scene = scene;
         this.renderer = renderer;
         this.camera = camera;
-        this.physics = physics;
         this.options = { ...this.options, ...props };
 
         this.panel = new GUI({ width: 100, title: 'Debug' });
@@ -76,7 +78,6 @@ export class Debug {
         this.components = {
             props: new DebugObjectProps(),
             orbit: new DebugOrbitControls(),
-            physics: new DebugPhysics(),
             scene: new DebugSceneTree(this.onSceneAction.bind(this)),
             transform: new DebugTransform(this.onTransformAction.bind(this)),
         };
@@ -86,7 +87,7 @@ export class Debug {
 
             // perform control's action if this option is enabled by default
             if (this.options[label]) {
-                this.components[label].action?.(this);
+                this.components[label]?.action?.(this);
             }
         }
 
@@ -114,7 +115,7 @@ export class Debug {
         });
     }
 
-    addCustomToggle({ label, initialValue, handler }: CustomToggle) {
+    addCustomToggle({ label, handler, initialValue = false }: CustomToggle) {
         if (Object.hasOwn(this.options, label)) {
             console.error(`a toggle with the name '${label}' already exists`);
             return;
@@ -128,24 +129,25 @@ export class Debug {
         this.createToggle(label);
     }
 
+    registerComponent({ label, instance, initialValue = false }: CustomComponent) {
+        this.options[label] = initialValue;
+        this.components[label] = instance;
+        this.createToggle(label);
+
+        if (initialValue === true) {
+            instance.action?.(this);
+        }
+    }
+
     onSceneAction(target: Object3D) {
-        if (this.components.props instanceof DebugObjectProps) {
-            this.components.props.action(this, target);
-        }
-
-        if (this.components.transform instanceof DebugTransform) {
-            this.components.transform.controls.attach(target);
-        }
-
+        this.components.props.action(this, target);
+        this.components.transform.controls?.attach(target);
         this.logObject(target);
     }
 
     onTransformAction(target: Object3D) {
         // show props panel for the selected object
-        if (this.components.props instanceof DebugObjectProps) {
-            this.components.props.action(this, target);
-        }
-
+        this.components.props.action(this, target);
         this.logObject(target);
     }
 
@@ -160,7 +162,7 @@ export class Debug {
     }
 
     update(dt: number) {
-        this.components.orbit.update?.();
-        this.components.physics.update?.(dt);
+        this.components.orbit.update?.(dt);
+        this.components.physics?.update?.();
     }
 }

@@ -1,4 +1,3 @@
-import { Body } from 'cannon-es';
 import GUI from 'lil-gui';
 import {
     BackSide,
@@ -20,8 +19,6 @@ import {
     type Side,
 } from 'three';
 import type { Debug } from './debug';
-
-type PhysicalObject3D = Object3D & { body: Body; };
 
 export class DebugObjectProps {
     private activeObjectUuid = '';
@@ -111,10 +108,6 @@ export class DebugObjectProps {
         if (target.children.length) {
             this.showGroupProps(target);
         }
-
-        if ('body' in target) {
-            this.showPhysicsBodyProps(target as PhysicalObject3D);
-        }
     }
 
     private showLightProps(target: Light) {
@@ -189,26 +182,6 @@ export class DebugObjectProps {
                 texture.needsUpdate = true;
             })
             .name('wrap');
-    }
-
-    private showPhysicsBodyProps(target: PhysicalObject3D) {
-        const { body } = target;
-        const folder = this.panel.addFolder('Physical Body');
-
-        folder.add(body, 'type', {
-            dynamic: Body.DYNAMIC,
-            static: Body.STATIC,
-            kinematic: Body.KINEMATIC,
-        });
-
-        folder.add(body, 'mass');
-        folder.add(body, 'angularDamping').min(0).max(1).step(0.01);
-        folder.add(body, 'linearDamping').min(0).max(1).step(0.01);
-
-        // this.handleVector3(folder, body, 'position');
-        // this.handleVector3(folder, body, 'velocity');
-        // this.handleVector3(folder, body, 'inertia');
-        // this.handleVector3(folder, body, 'force');
     }
 
     private showGroupProps(target: Object3D) {

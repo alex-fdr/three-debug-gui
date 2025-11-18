@@ -1,4 +1,4 @@
-import { Object3D, PerspectiveCamera, Raycaster, Vector2 } from 'three';
+import { type Object3D, type PerspectiveCamera, Raycaster, Vector2 } from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls';
 import { DebugOrbitControls } from './debug-orbit-controls';
 import type { Debug, DebugComponent } from './debug';
@@ -26,7 +26,7 @@ export class DebugTransform implements DebugComponent {
         this.onActionComplete = onActionComplete;
     }
 
-    action({ camera, renderer, scene, components: { orbit } }: Debug) {
+    action({ camera, renderer, scene, components }: Debug) {
         this.camera = camera;
 
         this.controls = new TransformControls(camera, renderer.domElement);
@@ -42,7 +42,7 @@ export class DebugTransform implements DebugComponent {
             .filter(({ children }) => children.every((c) => c.type !== 'Line'))
             .filter(({ name }) => name !== 'transform-controls');
 
-        this.bindEvents(orbit);
+        this.bindEvents(components.orbit);
     }
 
     private initActionsList(ctrl: TransformControls): ActionsList {
@@ -119,11 +119,7 @@ export class DebugTransform implements DebugComponent {
         };
     }
 
-    private bindEvents(orbit: DebugComponent) {
-        if (!(orbit instanceof DebugOrbitControls)) {
-            return;
-        }
-
+    private bindEvents(orbit: DebugOrbitControls) {
         this.controls?.addEventListener('mouseUp', () => {
             this.onActionComplete?.(this.controls?.object);
         });

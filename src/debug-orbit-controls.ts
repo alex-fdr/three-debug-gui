@@ -17,7 +17,7 @@ export class DebugOrbitControls implements DebugComponent {
         this.controls.enabled = status;
     }
 
-    update() {
-        this.controls?.update();
+    update(dt: number) {
+        this.controls?.update(dt);
     }
 }

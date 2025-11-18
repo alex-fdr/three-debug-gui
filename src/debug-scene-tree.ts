@@ -1,7 +1,6 @@
 import GUI from 'lil-gui';
 import type { Debug, DebugComponent } from './debug';
-import { Camera, type Light, type Mesh, type Object3D } from 'three';
-import { DebugObjectProps } from './debug-object-props';
+import type { Light, Mesh, Object3D } from 'three';
 
 export class DebugSceneTree implements DebugComponent {
     private exclude = ['transform-controls', 'TransformControlsGizmo'];
@@ -79,9 +78,6 @@ export class DebugSceneTree implements DebugComponent {
         }
 
         this.panel.show(status);
-
-        if (context.components.props instanceof DebugObjectProps) {
-            context.components.props.adjustPlacement(status);
-        }
+        context.components.props.adjustPlacement(status);
     }
 }
