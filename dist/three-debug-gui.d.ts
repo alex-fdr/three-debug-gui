@@ -2,8 +2,10 @@ import { default as default_2 } from 'lil-gui';
 import { Object3D } from 'three';
 import { OrbitControls } from '../node_modules/@types/three/examples/jsm/controls/OrbitControls';
 import { PerspectiveCamera } from 'three';
+import { Raycaster } from 'three';
 import { Scene } from 'three';
 import { TransformControls } from '../node_modules/@types/three/examples/jsm/controls/TransformControls';
+import { Vector2 } from 'three';
 import { WebGLRenderer } from 'three';
 
 declare type CoreSystems = {
@@ -86,8 +88,8 @@ declare class DebugSceneTree implements DebugComponent {
     private keepClosed;
     private lightsFolder;
     panel: default_2;
-    onActionComplete: Function;
-    constructor(onActionComplete: Function);
+    onActionComplete: (target: Object3D, name: string) => void;
+    constructor(onActionComplete: (target: Object3D, name: string) => void);
     action(context: Debug): void;
     private tweakPanelStyle;
     private traverseScene;
@@ -95,23 +97,18 @@ declare class DebugSceneTree implements DebugComponent {
 }
 
 declare class DebugTransform implements DebugComponent {
-    onActionComplete: Function;
+    onActionComplete: (arg: Object3D) => void;
     controls: TransformControls;
     isShiftPressed: boolean;
-    private camera;
-    private actions;
-    private keymap;
-    private selectable;
-    private intersected;
-    private raycaster;
-    private pointer;
-    private excludeTypes;
-    constructor(onActionComplete: Function);
+    selectable: Object3D[];
+    raycaster: Raycaster;
+    pointer: Vector2;
+    excludeTypes: string[];
+    constructor(onActionComplete: (arg: Object3D) => void);
     action({ camera, renderer, scene, components }: Debug): void;
-    private initActionsList;
-    private initKeymap;
-    private bindEvents;
-    private handleClick;
+    bindEvents(orbit: DebugOrbitControls): void;
+    handleKeyPress(key: string, ctrl: TransformControls): void;
+    handleClick(e: MouseEvent | Touch): void;
     toggle(status: boolean, context: Debug): void;
 }
 
