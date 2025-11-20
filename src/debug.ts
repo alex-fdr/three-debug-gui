@@ -1,7 +1,7 @@
 import GUI from 'lil-gui';
-import { Object3D, type PerspectiveCamera, type Scene, type WebGLRenderer } from 'three';
-import { DebugOrbitControls } from './debug-orbit-controls.ts';
+import type { Object3D, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { DebugObjectProps } from './debug-object-props.ts';
+import { DebugOrbitControls } from './debug-orbit-controls.ts';
 import { DebugSceneTree } from './debug-scene-tree.ts';
 import { DebugTransform } from './debug-transform.ts';
 

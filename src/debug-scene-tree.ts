@@ -1,15 +1,15 @@
 import GUI from 'lil-gui';
-import type { Debug, DebugComponent } from './debug';
 import type { Light, Mesh, Object3D } from 'three';
+import type { Debug, DebugComponent } from './debug';
 
 export class DebugSceneTree implements DebugComponent {
     private exclude = ['transform-controls', 'TransformControlsGizmo'];
     private keepClosed = ['mixamorig_Hips'];
     private lightsFolder!: GUI;
     panel!: GUI;
-    onActionComplete: Function;
+    onActionComplete: (target: Object3D, name: string) => void;
 
-    constructor(onActionComplete: Function) {
+    constructor(onActionComplete: (target: Object3D, name: string) => void) {
         this.onActionComplete = onActionComplete;
     }
 
@@ -52,8 +52,8 @@ export class DebugSceneTree implements DebugComponent {
             return;
         }
 
-        const isLight = ('isLight' in object && object.isLight);
-        const isMesh = ('isMesh' in object && object.isMesh);
+        const isLight = 'isLight' in object && object.isLight;
+        const isMesh = 'isMesh' in object && object.isMesh;
         const parent = isLight ? this.lightsFolder : parentFolder;
         const folder = parent.addFolder(name);
         const clickArea = folder.domElement.querySelector('.lil-title');

@@ -1,22 +1,22 @@
 import GUI from 'lil-gui';
 import {
     BackSide,
+    ClampToEdgeWrapping,
+    type Color,
     DoubleSide,
     FrontSide,
-    RepeatWrapping,
-    ClampToEdgeWrapping,
-    MirroredRepeatWrapping,
+    type Light,
+    type Material,
+    type Mesh,
     MeshBasicMaterial,
     MeshLambertMaterial,
     MeshPhongMaterial,
     MeshStandardMaterial,
+    MirroredRepeatWrapping,
     type Object3D,
-    type Light,
-    type Mesh,
-    type Color,
-    type Material,
-    type Wrapping,
+    RepeatWrapping,
     type Side,
+    type Wrapping,
 } from 'three';
 import type { Debug } from './debug';
 
@@ -128,15 +128,16 @@ export class DebugObjectProps {
 
         folder.add(material, 'transparent');
         folder.add(material, 'opacity', 0, 1);
-        folder
-            .add(material, 'side', { FrontSide, BackSide, DoubleSide })
-            .onChange((val: Side) => material.side = val);
+        folder.add(material, 'side', { FrontSide, BackSide, DoubleSide }).onChange((val: Side) => {
+            material.side = val;
+        });
 
-        if (material instanceof MeshLambertMaterial ||
+        if (
+            material instanceof MeshLambertMaterial ||
             material instanceof MeshBasicMaterial ||
             material instanceof MeshPhongMaterial ||
-            material instanceof MeshStandardMaterial) {
-
+            material instanceof MeshStandardMaterial
+        ) {
             if (Object.hasOwn(material, 'wireframe')) {
                 folder.add(material, 'wireframe');
             }
@@ -152,10 +153,16 @@ export class DebugObjectProps {
 
             this.showMaterialTextureProps(folder, material);
         }
-
     }
 
-    private showMaterialTextureProps(parent: GUI, material: MeshLambertMaterial | MeshBasicMaterial | MeshPhongMaterial | MeshStandardMaterial) {
+    private showMaterialTextureProps(
+        parent: GUI,
+        material:
+            | MeshLambertMaterial
+            | MeshBasicMaterial
+            | MeshPhongMaterial
+            | MeshStandardMaterial,
+    ) {
         const folder = parent.addFolder('Texture');
         const texture = material.map;
 
@@ -164,7 +171,11 @@ export class DebugObjectProps {
         }
 
         folder.add(texture, 'flipY');
-        folder.add(texture, 'rotation').min(0).max(Math.PI * 2).step(0.01);
+        folder
+            .add(texture, 'rotation')
+            .min(0)
+            .max(Math.PI * 2)
+            .step(0.01);
         folder.add(texture.offset, 'x').name('offsetX').min(0).max(1).step(0.01);
         folder.add(texture.offset, 'y').name('offsetY').min(0).max(1).step(0.01);
         folder.add(texture.repeat, 'x').name('repeatX');
@@ -194,12 +205,10 @@ export class DebugObjectProps {
         }
 
         const colorProps = { [key]: target[key].getHex() };
-        parentFolder
-            .addColor(colorProps, key)
-            .onChange((color: Color) => target[key].set(color));
+        parentFolder.addColor(colorProps, key).onChange((color: Color) => target[key].set(color));
     }
 
-    private handleFunction(parentFolder: GUI, label: string, callback: Function) {
+    private handleFunction(parentFolder: GUI, label: string, callback: () => void) {
         const obj = { fn: () => callback() };
         parentFolder.add(obj, 'fn').name(label);
     }
