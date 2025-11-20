@@ -1,5 +1,5 @@
+import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
@@ -12,15 +12,13 @@ export default defineConfig({
         },
         rollupOptions: {
             external: [
-                'three', 
+                'three',
                 'three/addons/controls/OrbitControls',
                 'three/addons/controls/TransformControls',
-                'lil-gui'
-            ]
+                'lil-gui',
+            ],
         },
         reportCompressedSize: false,
     },
-    plugins: [
-        dts({ rollupTypes: true })
-    ]
-})
+    plugins: [dts({ rollupTypes: true })],
+});
