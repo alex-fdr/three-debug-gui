@@ -1,189 +1,145 @@
-import { type Object3D, type PerspectiveCamera, Raycaster, Vector2 } from 'three';
+import { type Object3D, Raycaster, Vector2 } from 'three';
 import { TransformControls } from 'three/addons/controls/TransformControls';
-import { DebugOrbitControls } from './debug-orbit-controls';
 import type { Debug, DebugComponent } from './debug';
-
-const actions = ['translate', 'rotate', 'scale', 'xAxis', 'yAxis', 'zAxis', 'pick', 'snap', 'worldLocalSpace', 'reset', 'controlsSizeBigger', 'controlsSizeSmaller'] as const;
-const keys = ['x', 'y', 'z', 'w', 'g', 'r', 's', 'q', '+', '=', '-', '_', 'control', 'shift', 'escape'] as const;
-
-type ActionsList = Record<typeof actions[number], (arg?: boolean) => void>;
-type Keymap = Record<typeof keys[number], (arg?: boolean) => void>;
+import type { DebugOrbitControls } from './debug-orbit-controls';
 
 export class DebugTransform implements DebugComponent {
-    onActionComplete: Function;
+    onActionComplete: (arg: Object3D) => void;
     controls!: TransformControls;
     isShiftPressed: boolean = false;
-    private camera!: PerspectiveCamera;
-    private actions!: ActionsList;
-    private keymap!: Keymap;
-    private selectable: Object3D[] = [];
-    private intersected: Object3D | null = null;
-    private raycaster = new Raycaster();
-    private pointer = new Vector2();
-    private excludeTypes = ['LineSegments', 'DirectionalLight', 'HemisphereLight', 'Line'];
+    selectable: Object3D[] = [];
+    raycaster = new Raycaster();
+    pointer = new Vector2();
+    excludeTypes = ['Line', 'LineSegments', 'DirectionalLight', 'HemisphereLight'];
 
-    constructor(onActionComplete: Function) {
+    constructor(onActionComplete: (arg: Object3D) => void) {
         this.onActionComplete = onActionComplete;
     }
 
     action({ camera, renderer, scene, components }: Debug) {
-        this.camera = camera;
-
         this.controls = new TransformControls(camera, renderer.domElement);
+
         const helper = this.controls.getHelper();
         helper.name = 'transform-controls';
         scene.add(helper);
 
-        this.actions = this.initActionsList(this.controls);
-        this.keymap = this.initKeymap(this.actions);
-
-        this.selectable = scene.children
-            .filter(({ type }) => !this.excludeTypes.includes(type))
-            .filter(({ children }) => children.every((c) => c.type !== 'Line'))
-            .filter(({ name }) => name !== 'transform-controls');
+        this.selectable = scene.children.filter(({ name }) => name !== helper.name);
 
         this.bindEvents(components.orbit);
     }
 
-    private initActionsList(ctrl: TransformControls): ActionsList {
-        return {
-            translate: () => {
-                ctrl.setMode('translate');
-            },
-            rotate: () => {
-                ctrl.setMode('rotate');
-            },
-            scale: () => {
-                ctrl.setMode('scale');
-            },
-            xAxis: () => {
-                ctrl.showX = true;
-                ctrl.showY = ctrl.showY === ctrl.showZ ? !ctrl.showY : false;
-                ctrl.showZ = ctrl.showY;
-            },
-            yAxis: () => {
-                ctrl.showX = ctrl.showX === ctrl.showZ ? !ctrl.showX : false;
-                ctrl.showY = true;
-                ctrl.showZ = ctrl.showX;
-            },
-            zAxis: () => {
-                ctrl.showX = ctrl.showX === ctrl.showY ? !ctrl.showX : false;
-                ctrl.showY = ctrl.showX;
-                ctrl.showZ = true;
-            },
-            pick: (status = true) => {
-                this.isShiftPressed = status;
-            },
-            snap: () => {
-                if (!ctrl.translationSnap) {
-                    ctrl.setTranslationSnap(1);
-                    ctrl.setRotationSnap(15 * (Math.PI / 180));
-                } else {
-                    ctrl.setTranslationSnap(null);
-                    ctrl.setRotationSnap(null);
-                }
-            },
-            worldLocalSpace: () => {
-                ctrl.setSpace(ctrl.space === 'local' ? 'world' : 'local');
-            },
-            reset: () => {
-                ctrl.detach();
-                ctrl.showX = ctrl.showY = ctrl.showZ = true;
-            },
-            controlsSizeBigger: () => {
-                ctrl.setSize(ctrl.size + 0.1);
-            },
-            controlsSizeSmaller: () => {
-                ctrl.setSize(Math.max(ctrl.size - 0.1, 0.1));
-            },
-        };
-    }
-
-    private initKeymap(actions: ActionsList): Keymap {
-        return {
-            x: () => actions.xAxis(),
-            y: () => actions.yAxis(),
-            z: () => actions.zAxis(),
-            w: () => actions.translate(),
-            g: () => actions.translate(),
-            r: () => actions.rotate(),
-            s: () => actions.scale(),
-            q: () => actions.worldLocalSpace(),
-            shift: (arg) => actions.pick(arg),
-            control: () => actions.snap(),
-            escape: () => actions.reset(),
-            '+': () => actions.controlsSizeBigger(),
-            '=': () => actions.controlsSizeBigger(),
-            '-': () => actions.controlsSizeSmaller(),
-            _: () => actions.controlsSizeSmaller(),
-        };
-    }
-
-    private bindEvents(orbit: DebugOrbitControls) {
-        this.controls?.addEventListener('mouseUp', () => {
-            this.onActionComplete?.(this.controls?.object);
+    bindEvents(orbit: DebugOrbitControls) {
+        this.controls.addEventListener('mouseUp', () => {
+            this.onActionComplete?.(this.controls.object);
         });
 
-        this.controls?.addEventListener('dragging-changed', (event) => {
+        this.controls.addEventListener('dragging-changed', (event) => {
             if (orbit?.controls) {
                 orbit.controls.enabled = !event.value;
             }
         });
 
-        window.addEventListener('keydown', (event) => {
-            const key = event.key.toLowerCase();
-            const isShiftKey = key === 'shift';
-            this.keymap[key as typeof keys[number]]?.(isShiftKey);
+        window.addEventListener('keydown', ({ key }) => {
+            if (this.controls.enabled) {
+                this.handleKeyPress(key, this.controls);
+            }
         });
 
-        window.addEventListener('keyup', (event) => {
-            const key = event.key.toLowerCase();
-            if (key === 'shift') {
-                this.keymap?.[key](false);
+        window.addEventListener('keyup', ({ key }) => {
+            if (key === 'Shift') {
+                this.isShiftPressed = false;
             }
         });
 
         const hasTouchEvent = 'ontouchstart' in document.documentElement;
         const hasTouchPoints = window.navigator.maxTouchPoints >= 1;
-        const isTouch = hasTouchEvent || hasTouchPoints;
-        const eventName = isTouch ? 'touchstart' : 'mousedown';
+        const eventName = hasTouchEvent || hasTouchPoints ? 'touchstart' : 'mousedown';
 
         window.addEventListener(eventName, (e) => {
-            this.handleClick((e instanceof TouchEvent) ? e.changedTouches[0] : e);
+            this.handleClick(e instanceof TouchEvent ? e.changedTouches[0] : e);
         });
     }
 
-    private handleClick(e: MouseEvent | Touch) {
+    handleKeyPress(key: string, ctrl: TransformControls) {
+        switch (key) {
+            case 'g':
+                ctrl.setMode('translate');
+                break;
+            case 'r':
+                ctrl.setMode('rotate');
+                break;
+            case 's':
+                ctrl.setMode('scale');
+                break;
+            case 'x':
+                ctrl.showX = true;
+                ctrl.showY = ctrl.showY === ctrl.showZ ? !ctrl.showY : false;
+                ctrl.showZ = ctrl.showY;
+                break;
+            case 'y':
+                ctrl.showX = ctrl.showX === ctrl.showZ ? !ctrl.showX : false;
+                ctrl.showY = true;
+                ctrl.showZ = ctrl.showX;
+                break;
+            case 'z':
+                ctrl.showX = ctrl.showX === ctrl.showY ? !ctrl.showX : false;
+                ctrl.showY = ctrl.showX;
+                ctrl.showZ = true;
+                break;
+            case 'q':
+                ctrl.setSpace(ctrl.space === 'local' ? 'world' : 'local');
+                break;
+            case 'Control':
+                if (!ctrl.translationSnap) {
+                    ctrl.setTranslationSnap(1);
+                    ctrl.setRotationSnap(15 * (Math.PI / 180));
+                    ctrl.setScaleSnap(0.1);
+                } else {
+                    ctrl.setTranslationSnap(null);
+                    ctrl.setRotationSnap(null);
+                    ctrl.setScaleSnap(null);
+                }
+                break;
+            case 'Escape':
+                ctrl.detach();
+                ctrl.showX = ctrl.showY = ctrl.showZ = true;
+                break;
+            case 'Shift':
+                this.isShiftPressed = true;
+                break;
+            case '+':
+            case '=':
+                ctrl.setSize(ctrl.size + 0.1);
+                break;
+            case '-':
+            case '_':
+                ctrl.setSize(Math.max(ctrl.size - 0.1, 0.1));
+                break;
+            default:
+                console.warn('unsupported key pressed', key);
+        }
+    }
+
+    handleClick(e: MouseEvent | Touch) {
         if (!this.controls?.enabled || !this.isShiftPressed) {
             return;
         }
 
         this.pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
         this.pointer.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        this.raycaster.setFromCamera(this.pointer, this.camera);
+        this.raycaster.setFromCamera(this.pointer, this.controls.camera);
 
-        const [firstIntersect] = this.raycaster.intersectObjects(
-            this.selectable,
-            true,
-        );
+        const [firstIntersect] = this.raycaster.intersectObjects(this.selectable, true);
 
-        if (firstIntersect && firstIntersect.object !== this.intersected) {
-            this.intersected = firstIntersect.object;
-        }
-
-        if (this.intersected) {
-            this.controls.attach(this.intersected);
-            this.onActionComplete?.(this.intersected);
+        if (firstIntersect?.object) {
+            this.controls.attach(firstIntersect.object);
+            this.onActionComplete?.(firstIntersect.object);
         }
     }
 
     toggle(status: boolean, context: Debug) {
         if (!this.controls) {
             this.action(context);
-        }
-
-        if (!this.controls) {
-            return;
         }
 
         this.controls.enabled = status;
