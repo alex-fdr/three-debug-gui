@@ -199,12 +199,15 @@ export class DebugObjectProps {
         this.panel.add(target, 'visible');
     }
 
-    private handleColor(parentFolder: GUI, target: any, key: string) {
+    // biome-ignore lint/suspicious/noExplicitAny: Have no idea how to get rid off 'any' here
+    private handleColor(parentFolder: GUI, target: any, key: string): void {
         if (!target[key]) {
             return;
         }
 
-        const colorProps = { [key]: target[key].getHex() };
+        const colorProps = {
+            [key]: target[key].getHex(),
+        };
         parentFolder.addColor(colorProps, key).onChange((color: Color) => target[key].set(color));
     }
 
