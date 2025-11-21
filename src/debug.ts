@@ -16,7 +16,6 @@ type Options = {
     props: boolean;
     transform: boolean;
     orbit: boolean;
-    // physics: boolean;
     [key: string]: boolean;
 };
 
@@ -75,12 +74,10 @@ export class Debug {
         this.panel = new GUI({ width: 100, title: 'Debug' });
         this.panel.domElement.setAttribute('id', 'debug-panel');
 
-        this.components = {
-            props: new DebugObjectProps(),
-            orbit: new DebugOrbitControls(),
-            scene: new DebugSceneTree(this.onSceneAction.bind(this)),
-            transform: new DebugTransform(this.onTransformAction.bind(this)),
-        };
+        this.components.props = new DebugObjectProps();
+        this.components.orbit = new DebugOrbitControls();
+        this.components.scene = new DebugSceneTree(this.onSceneAction.bind(this));
+        this.components.transform = new DebugTransform(this.onTransformAction.bind(this));
 
         for (const label of Object.keys(this.options)) {
             this.createToggle(label);
@@ -152,7 +149,9 @@ export class Debug {
     }
 
     logObject(target: Object3D) {
-        if (!target) return;
+        if (!target) {
+            return;
+        }
 
         console.log('\n');
         console.log('target:   ', target);
