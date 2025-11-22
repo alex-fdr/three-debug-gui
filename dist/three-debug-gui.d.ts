@@ -1,4 +1,11 @@
 import { default as default_2 } from 'lil-gui';
+import { Light } from 'three';
+import { Material } from 'three';
+import { Mesh } from 'three';
+import { MeshBasicMaterial } from 'three';
+import { MeshLambertMaterial } from 'three';
+import { MeshPhongMaterial } from 'three';
+import { MeshStandardMaterial } from 'three';
 import { Object3D } from 'three';
 import { OrbitControls } from '../node_modules/@types/three/examples/jsm/controls/OrbitControls';
 import { PerspectiveCamera } from 'three';
@@ -6,24 +13,11 @@ import { Raycaster } from 'three';
 import { Scene } from 'three';
 import { TransformControls } from '../node_modules/@types/three/examples/jsm/controls/TransformControls';
 import { Vector2 } from 'three';
-import { WebGLRenderer } from 'three';
-
-declare type CoreSystems = {
-    scene: Scene;
-    camera: PerspectiveCamera;
-    renderer: WebGLRenderer;
-};
 
 declare type CustomComponent = {
     label: string;
     initialValue: boolean;
     instance: DebugComponent;
-};
-
-declare type CustomToggle = {
-    label: string;
-    initialValue: boolean;
-    handler: (status: boolean) => void;
 };
 
 export declare class Debug {
@@ -37,13 +31,12 @@ export declare class Debug {
     };
     panel: default_2;
     scene: Scene;
-    renderer: WebGLRenderer;
+    canvas: HTMLCanvasElement;
     camera: PerspectiveCamera;
     constructor();
-    init({ scene, renderer, camera }: CoreSystems, props?: {}): void;
+    init({ scene, canvas, camera, props }: DebugParams): void;
     tweakPanelStyle(): void;
     createToggle(label: keyof Options): void;
-    addCustomToggle({ label, handler, initialValue }: CustomToggle): void;
     registerComponent({ label, instance, initialValue }: CustomComponent): void;
     onSceneAction(target: Object3D): void;
     onTransformAction(target: Object3D): void;
@@ -54,62 +47,73 @@ export declare class Debug {
 export declare const debug: Debug;
 
 export declare interface DebugComponent {
-    action?(context: Debug, target?: Object3D): void;
-    toggle(status: boolean, context: Debug): void;
+    action?(target?: Object3D): void;
+    toggle(status: boolean): void;
     update?(dt?: number): void;
 }
 
 declare class DebugObjectProps {
-    private activeObjectUuid;
+    context: Debug;
     panel: default_2;
-    private createPanel;
+    private activeObjectUuid;
+    constructor(context: Debug);
+    createPanel(): default_2;
     adjustPlacement(visible: boolean): void;
-    toggle(status: boolean, context: Debug): void;
-    action(context: Debug, target?: Object3D): void;
-    private clearPanel;
-    private parseObject;
-    private showLightProps;
-    private showMaterialProps;
-    private showMaterialTextureProps;
-    private showGroupProps;
-    private handleColor;
-    private handleFunction;
+    toggle(status: boolean): void;
+    action(target?: Object3D): void;
+    clearPanel(): void;
+    parseObject(target: Object3D | Light | Mesh): void;
+    showLightProps(target: Light): void;
+    showMaterialProps(target: Mesh, material: Material, materialId: number): void;
+    showMaterialTextureProps(parent: default_2, material: MeshLambertMaterial | MeshBasicMaterial | MeshPhongMaterial | MeshStandardMaterial): void;
+    showGroupProps(target: Object3D): void;
+    handleColor(parentFolder: default_2, target: any, key: string): void;
+    handleFunction(parentFolder: default_2, label: string, callback: () => void): void;
 }
 
 declare class DebugOrbitControls implements DebugComponent {
     controls: OrbitControls;
-    action({ camera, renderer }: Debug): void;
-    toggle(status: boolean, context: Debug): void;
+    context: Debug;
+    constructor(context: Debug);
+    action(): void;
+    toggle(status: boolean): void;
     update(dt: number): void;
 }
 
+declare type DebugParams = {
+    scene: Scene;
+    camera: PerspectiveCamera;
+    canvas: HTMLCanvasElement;
+    props: Partial<Options>;
+};
+
 declare class DebugSceneTree implements DebugComponent {
+    context: Debug;
+    panel: default_2;
     private exclude;
     private keepClosed;
     private lightsFolder;
-    panel: default_2;
-    onActionComplete: (target: Object3D, name: string) => void;
-    constructor(onActionComplete: (target: Object3D, name: string) => void);
-    action(context: Debug): void;
-    private tweakPanelStyle;
-    private traverseScene;
-    toggle(status: boolean, context: Debug): void;
+    constructor(context: Debug);
+    action(): void;
+    tweakPanelStyle(): void;
+    traverseScene(object: Object3D | Light | Mesh, parentFolder: default_2): void;
+    toggle(status: boolean): void;
 }
 
 declare class DebugTransform implements DebugComponent {
-    onActionComplete: (arg: Object3D) => void;
+    context: Debug;
     controls: TransformControls;
     isShiftPressed: boolean;
     selectable: Object3D[];
     raycaster: Raycaster;
     pointer: Vector2;
     excludeTypes: string[];
-    constructor(onActionComplete: (arg: Object3D) => void);
-    action({ camera, renderer, scene, components }: Debug): void;
+    constructor(context: Debug);
+    action(): void;
     bindEvents(orbit: DebugOrbitControls): void;
     handleKeyPress(key: string, ctrl: TransformControls): void;
     handleClick(e: MouseEvent | Touch): void;
-    toggle(status: boolean, context: Debug): void;
+    toggle(status: boolean): void;
 }
 
 declare type Options = {
@@ -117,7 +121,7 @@ declare type Options = {
     props: boolean;
     transform: boolean;
     orbit: boolean;
-    [key: string]: boolean;
+    [key: string]: boolean | undefined;
 };
 
 export { }
