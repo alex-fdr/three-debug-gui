@@ -21,10 +21,15 @@ import {
 import type { Debug } from './debug';
 
 export class DebugObjectProps {
-    private activeObjectUuid = '';
+    context: Debug;
     panel!: GUI;
+    private activeObjectUuid = '';
 
-    private createPanel() {
+    constructor(context: Debug) {
+        this.context = context;
+    }
+
+    createPanel() {
         return new GUI({ title: 'Object Props', width: 200 });
     }
 
@@ -37,23 +42,23 @@ export class DebugObjectProps {
         this.panel.domElement.style.right = visible ? '200px' : '0px';
     }
 
-    toggle(status: boolean, context: Debug) {
+    toggle(status: boolean) {
         if (!this.panel) {
-            this.action(context);
+            this.action();
         }
 
         this.panel.show(status);
     }
 
-    action(context: Debug, target?: Object3D) {
-        if (!context.options.props) {
+    action(target?: Object3D) {
+        if (!this.context.options.props) {
             return;
         }
 
         if (!this.panel) {
             this.panel = this.createPanel();
             this.panel.close();
-            this.adjustPlacement(context.options.scene === true);
+            this.adjustPlacement(this.context.options.scene === true);
         }
 
         if (!target) {
@@ -77,7 +82,7 @@ export class DebugObjectProps {
         this.parseObject(target);
     }
 
-    private clearPanel() {
+    clearPanel() {
         for (const child of this.panel.children) {
             child.destroy();
         }
@@ -91,7 +96,7 @@ export class DebugObjectProps {
         }
     }
 
-    private parseObject(target: Object3D | Light | Mesh) {
+    parseObject(target: Object3D | Light | Mesh) {
         if ('isLight' in target) {
             this.showLightProps(target);
         }
@@ -110,13 +115,13 @@ export class DebugObjectProps {
         }
     }
 
-    private showLightProps(target: Light) {
+    showLightProps(target: Light) {
         this.handleColor(this.panel, target, 'color');
         this.handleColor(this.panel, target, 'groundColor');
         this.panel.add(target, 'intensity', 0, 3, 0.1);
     }
 
-    private showMaterialProps(target: Mesh, material: Material, materialId: number) {
+    showMaterialProps(target: Mesh, material: Material, materialId: number) {
         const name = materialId > 0 ? `Material${materialId}` : 'Material';
         const folder = this.panel.addFolder(name);
         folder.add(material, 'type');
@@ -155,7 +160,7 @@ export class DebugObjectProps {
         }
     }
 
-    private showMaterialTextureProps(
+    showMaterialTextureProps(
         parent: GUI,
         material:
             | MeshLambertMaterial
@@ -195,12 +200,12 @@ export class DebugObjectProps {
             .name('wrap');
     }
 
-    private showGroupProps(target: Object3D) {
+    showGroupProps(target: Object3D) {
         this.panel.add(target, 'visible');
     }
 
     // biome-ignore lint/suspicious/noExplicitAny: Have no idea how to get rid off 'any' here
-    private handleColor(parentFolder: GUI, target: any, key: string): void {
+    handleColor(parentFolder: GUI, target: any, key: string): void {
         if (!target[key]) {
             return;
         }
@@ -211,7 +216,7 @@ export class DebugObjectProps {
         parentFolder.addColor(colorProps, key).onChange((color: Color) => target[key].set(color));
     }
 
-    private handleFunction(parentFolder: GUI, label: string, callback: () => void) {
+    handleFunction(parentFolder: GUI, label: string, callback: () => void) {
         const obj = { fn: () => callback() };
         parentFolder.add(obj, 'fn').name(label);
     }

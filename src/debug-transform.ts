@@ -17,7 +17,7 @@ import type { DebugOrbitControls } from './debug-orbit-controls';
 // Escape - reset, detach controls from selected object
 
 export class DebugTransform implements DebugComponent {
-    onActionComplete: (arg: Object3D) => void;
+    context: Debug;
     controls!: TransformControls;
     isShiftPressed: boolean = false;
     selectable: Object3D[] = [];
@@ -25,11 +25,13 @@ export class DebugTransform implements DebugComponent {
     pointer = new Vector2();
     excludeTypes = ['Line', 'LineSegments', 'DirectionalLight', 'HemisphereLight'];
 
-    constructor(onActionComplete: (arg: Object3D) => void) {
-        this.onActionComplete = onActionComplete;
+    constructor(context: Debug) {
+        this.context = context;
     }
 
-    action({ camera, renderer, scene, components }: Debug) {
+    action() {
+        const { camera, renderer, scene, components } = this.context;
+
         this.controls = new TransformControls(camera, renderer.domElement);
 
         const helper = this.controls.getHelper();
@@ -43,7 +45,7 @@ export class DebugTransform implements DebugComponent {
 
     bindEvents(orbit: DebugOrbitControls) {
         this.controls.addEventListener('mouseUp', () => {
-            this.onActionComplete?.(this.controls.object);
+            this.context.onTransformAction?.(this.controls.object);
         });
 
         this.controls.addEventListener('dragging-changed', (event) => {
@@ -146,13 +148,13 @@ export class DebugTransform implements DebugComponent {
 
         if (firstIntersect?.object) {
             this.controls.attach(firstIntersect.object);
-            this.onActionComplete?.(firstIntersect.object);
+            this.context.onTransformAction?.(firstIntersect.object);
         }
     }
 
-    toggle(status: boolean, context: Debug) {
+    toggle(status: boolean) {
         if (!this.controls) {
-            this.action(context);
+            this.action();
         }
 
         this.controls.enabled = status;

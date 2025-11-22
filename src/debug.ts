@@ -6,26 +6,27 @@ import { DebugSceneTree } from './debug-scene-tree.ts';
 import { DebugTransform } from './debug-transform.ts';
 
 export interface DebugComponent {
-    action?(context: Debug, target?: Object3D): void;
-    toggle(status: boolean, context: Debug): void;
+    action?(target?: Object3D): void;
+    toggle(status: boolean): void;
     update?(dt?: number): void;
 }
 
-type Options = {
+export type Options = {
     scene: boolean;
     props: boolean;
     transform: boolean;
     orbit: boolean;
-    [key: string]: boolean;
+    [key: string]: boolean | undefined;
 };
 
-type CoreSystems = {
+export type DebugParams = {
     scene: Scene;
     camera: PerspectiveCamera;
     renderer: WebGLRenderer;
+    props: Partial<Options>;
 };
 
-type CustomToggle = {
+export type CustomToggle = {
     label: string;
     initialValue: boolean;
     handler: (status: boolean) => void;
@@ -57,11 +58,10 @@ export class Debug {
             props: false,
             transform: false,
             orbit: false,
-            // physics: false,
         };
     }
 
-    init({ scene, renderer, camera }: CoreSystems, props = {}) {
+    init({ scene, renderer, camera, props = {} }: DebugParams) {
         if (this.panel) {
             return;
         }
@@ -74,17 +74,17 @@ export class Debug {
         this.panel = new GUI({ width: 100, title: 'Debug' });
         this.panel.domElement.setAttribute('id', 'debug-panel');
 
-        this.components.props = new DebugObjectProps();
-        this.components.orbit = new DebugOrbitControls();
-        this.components.scene = new DebugSceneTree(this.onSceneAction.bind(this));
-        this.components.transform = new DebugTransform(this.onTransformAction.bind(this));
+        this.components.props = new DebugObjectProps(this);
+        this.components.orbit = new DebugOrbitControls(this);
+        this.components.scene = new DebugSceneTree(this);
+        this.components.transform = new DebugTransform(this);
 
         for (const label of Object.keys(this.options)) {
             this.createToggle(label);
 
-            // perform control's action if this option is enabled by default
+            // perform control's action if it is enabled by default
             if (this.options[label]) {
-                this.components[label]?.action?.(this);
+                this.components[label].action?.();
             }
         }
 
@@ -108,7 +108,7 @@ export class Debug {
     createToggle(label: keyof Options) {
         this.panel.add(this.options, label).onChange((value: boolean) => {
             this.options[label] = value;
-            this.components[label]?.toggle(value, this);
+            this.components[label]?.toggle(value);
         });
     }
 
@@ -118,12 +118,16 @@ export class Debug {
             return;
         }
 
-        this.options[label] = initialValue;
-        this.components[label] = {
-            toggle: (status) => handler(status),
-        };
-
-        this.createToggle(label);
+        // this.options[label] = initialValue;
+        // this.components[label] = { toggle: (status) => handler(status) };
+        // this.createToggle(label);
+        this.registerComponent({
+            label,
+            initialValue,
+            instance: {
+                toggle: (status) => handler(status),
+            },
+        });
     }
 
     registerComponent({ label, instance, initialValue = false }: CustomComponent) {
@@ -132,19 +136,19 @@ export class Debug {
         this.createToggle(label);
 
         if (initialValue === true) {
-            instance.action?.(this);
+            instance.action?.();
         }
     }
 
     onSceneAction(target: Object3D) {
-        this.components.props.action(this, target);
+        this.components.props.action(target);
         this.components.transform.controls?.attach(target);
         this.logObject(target);
     }
 
     onTransformAction(target: Object3D) {
         // show props panel for the selected object
-        this.components.props.action(this, target);
+        this.components.props.action(target);
         this.logObject(target);
     }
 

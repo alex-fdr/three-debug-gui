@@ -3,15 +3,21 @@ import type { Debug, DebugComponent } from './debug';
 
 export class DebugOrbitControls implements DebugComponent {
     controls!: OrbitControls;
+    context: Debug;
 
-    action({ camera, renderer }: Debug) {
+    constructor(context: Debug) {
+        this.context = context;
+    }
+
+    action() {
+        const { camera, renderer } = this.context;
         this.controls = new OrbitControls(camera, renderer.domElement);
         this.controls.update();
     }
 
-    toggle(status: boolean, context: Debug) {
+    toggle(status: boolean) {
         if (!this.controls) {
-            this.action(context);
+            this.action();
         }
 
         this.controls.enabled = status;

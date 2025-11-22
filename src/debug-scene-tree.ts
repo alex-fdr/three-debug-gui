@@ -3,17 +3,17 @@ import type { Light, Mesh, Object3D } from 'three';
 import type { Debug, DebugComponent } from './debug';
 
 export class DebugSceneTree implements DebugComponent {
+    context: Debug;
+    panel!: GUI;
     private exclude = ['transform-controls', 'TransformControlsGizmo'];
     private keepClosed = ['mixamorig_Hips'];
     private lightsFolder!: GUI;
-    panel!: GUI;
-    onActionComplete: (target: Object3D, name: string) => void;
 
-    constructor(onActionComplete: (target: Object3D, name: string) => void) {
-        this.onActionComplete = onActionComplete;
+    constructor(context: Debug) {
+        this.context = context;
     }
 
-    action(context: Debug) {
+    action() {
         this.panel = new GUI({ title: 'Scene Tree', width: 200 });
         this.panel.domElement.style.right = '0px';
 
@@ -21,12 +21,12 @@ export class DebugSceneTree implements DebugComponent {
 
         this.tweakPanelStyle();
 
-        for (const child of context.scene.children) {
+        for (const child of this.context.scene.children) {
             this.traverseScene(child, this.panel);
         }
     }
 
-    private tweakPanelStyle() {
+    tweakPanelStyle() {
         const styleElement = document.createElement('style');
         styleElement.textContent = `
             .lil-gui {
@@ -45,7 +45,7 @@ export class DebugSceneTree implements DebugComponent {
         document.head.appendChild(styleElement);
     }
 
-    private traverseScene(object: Object3D | Light | Mesh, parentFolder: GUI) {
+    traverseScene(object: Object3D | Light | Mesh, parentFolder: GUI) {
         const name = object.name !== '' ? object.name : object.type;
 
         if (this.exclude.includes(name)) {
@@ -59,7 +59,7 @@ export class DebugSceneTree implements DebugComponent {
         const clickArea = folder.domElement.querySelector('.lil-title');
 
         clickArea?.addEventListener('click', () => {
-            this.onActionComplete?.(object, name);
+            this.context.onSceneAction?.(object);
         });
 
         if (this.keepClosed.includes(name) || isLight || isMesh) {
@@ -72,12 +72,12 @@ export class DebugSceneTree implements DebugComponent {
         }
     }
 
-    toggle(status: boolean, context: Debug) {
+    toggle(status: boolean) {
         if (!this.panel) {
-            this.action(context);
+            this.action();
         }
 
         this.panel.show(status);
-        context.components.props.adjustPlacement(status);
+        this.context.components.props.adjustPlacement(status);
     }
 }
