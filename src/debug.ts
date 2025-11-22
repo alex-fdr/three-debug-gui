@@ -1,5 +1,5 @@
 import GUI from 'lil-gui';
-import type { Object3D, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import type { Object3D, PerspectiveCamera, Scene } from 'three';
 import { DebugObjectProps } from './debug-object-props.ts';
 import { DebugOrbitControls } from './debug-orbit-controls.ts';
 import { DebugSceneTree } from './debug-scene-tree.ts';
@@ -22,14 +22,8 @@ export type Options = {
 export type DebugParams = {
     scene: Scene;
     camera: PerspectiveCamera;
-    renderer: WebGLRenderer;
+    canvas: HTMLCanvasElement;
     props: Partial<Options>;
-};
-
-export type CustomToggle = {
-    label: string;
-    initialValue: boolean;
-    handler: (status: boolean) => void;
 };
 
 export type CustomComponent = {
@@ -49,7 +43,7 @@ export class Debug {
     };
     panel!: GUI;
     scene!: Scene;
-    renderer!: WebGLRenderer;
+    canvas!: HTMLCanvasElement;
     camera!: PerspectiveCamera;
 
     constructor() {
@@ -61,23 +55,25 @@ export class Debug {
         };
     }
 
-    init({ scene, renderer, camera, props = {} }: DebugParams) {
+    init({ scene, canvas, camera, props = {} }: DebugParams) {
         if (this.panel) {
             return;
         }
 
         this.scene = scene;
-        this.renderer = renderer;
+        this.canvas = canvas;
         this.camera = camera;
         this.options = { ...this.options, ...props };
 
         this.panel = new GUI({ width: 100, title: 'Debug' });
         this.panel.domElement.setAttribute('id', 'debug-panel');
 
-        this.components.props = new DebugObjectProps(this);
-        this.components.orbit = new DebugOrbitControls(this);
-        this.components.scene = new DebugSceneTree(this);
-        this.components.transform = new DebugTransform(this);
+        this.components = {
+            props: new DebugObjectProps(this),
+            orbit: new DebugOrbitControls(this),
+            scene: new DebugSceneTree(this),
+            transform: new DebugTransform(this),
+        };
 
         for (const label of Object.keys(this.options)) {
             this.createToggle(label);
@@ -112,25 +108,12 @@ export class Debug {
         });
     }
 
-    addCustomToggle({ label, handler, initialValue = false }: CustomToggle) {
+    registerComponent({ label, instance, initialValue = false }: CustomComponent) {
         if (Object.hasOwn(this.options, label)) {
             console.error(`a toggle with the name '${label}' already exists`);
             return;
         }
 
-        // this.options[label] = initialValue;
-        // this.components[label] = { toggle: (status) => handler(status) };
-        // this.createToggle(label);
-        this.registerComponent({
-            label,
-            initialValue,
-            instance: {
-                toggle: (status) => handler(status),
-            },
-        });
-    }
-
-    registerComponent({ label, instance, initialValue = false }: CustomComponent) {
         this.options[label] = initialValue;
         this.components[label] = instance;
         this.createToggle(label);

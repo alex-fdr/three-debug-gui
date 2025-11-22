@@ -30,9 +30,9 @@ export class DebugTransform implements DebugComponent {
     }
 
     action() {
-        const { camera, renderer, scene, components } = this.context;
+        const { camera, canvas, scene, components } = this.context;
 
-        this.controls = new TransformControls(camera, renderer.domElement);
+        this.controls = new TransformControls(camera, canvas);
 
         const helper = this.controls.getHelper();
         helper.name = 'transform-controls';

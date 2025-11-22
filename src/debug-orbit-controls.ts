@@ -10,8 +10,8 @@ export class DebugOrbitControls implements DebugComponent {
     }
 
     action() {
-        const { camera, renderer } = this.context;
-        this.controls = new OrbitControls(camera, renderer.domElement);
+        const { camera, canvas } = this.context;
+        this.controls = new OrbitControls(camera, canvas);
         this.controls.update();
     }
 
