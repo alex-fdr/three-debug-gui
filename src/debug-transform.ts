@@ -3,19 +3,6 @@ import { TransformControls } from 'three/addons/controls/TransformControls';
 import type { Debug, DebugComponent } from './debug';
 import type { DebugOrbitControls } from './debug-orbit-controls';
 
-// How to use:
-// Shift + Left Click - select an object
-// g - translate mode, move selected object around
-// r - rotate mode
-// s - scale mode
-// Control - toggle snap mode change position, rotation or scale incrementally with a predefined step
-// x - toggle X axis
-// y - toggle Y axis
-// z - toggle Z axis
-// q - toggle world-local coordinate space
-// '+', '-' - change controls size
-// Escape - reset, detach controls from selected object
-
 export class DebugTransform implements DebugComponent {
     context: Debug;
     controls!: TransformControls;
