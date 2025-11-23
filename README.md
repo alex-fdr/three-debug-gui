@@ -1,19 +1,19 @@
 # three-debug-gui
-A bunch of helpers to ease the development process using three.js library.
+This package leverages `lil-gui` library to show some useful stuff to help with the development of `three.js` based projects.
 
 [![npm version](https://img.shields.io/npm/v/@alexfdr/three-debug-gui)](https://www.npmjs.com/package/@alexfdr/three-debug-gui)
 
 ## About
-This package leverages `lil-gui` gui library to show add some extra debugging stuff for `three.js` based projects.
+
 ![Screenshot](/docs/screenshot-main-view.jpg)
 ![Screenshot](/docs/screenshot-custom-components.jpg)
 
 ### Components
-Here is the list of components inlcuded by default.
-Custom toggle components can be defined later.
+Here is the list of components included by default.
+Custom toggle components can be defined and added later on.
 
 #### debug-scene-tree
-Show entire scene tree
+Show the entire scene tree
 
 #### debug-object-props 
 Inspect selected object and tweak it's material, texture, visibility etc, 
@@ -22,7 +22,20 @@ Inspect selected object and tweak it's material, texture, visibility etc,
 Toggle on/off OrbitControls
 
 #### debug-transform component
-Allows to pick an object on the scene and modify its position, scale, rotation in-place
+Allows to pick an object on the scene and modify its position, scale, rotation in-place. Based on `three/addons/controls/TransformControls.js`
+
+- `Shift` + `Left Click` - pick an object
+- `g` - translate mode, move selected object around
+- `r` - rotate mode
+- `s` - scale mode
+- `x` - toggle X axis
+- `y` - toggle Y axis
+- `z` - toggle Z axis
+- `q` - toggle world-local coordinate space
+- `+` or `=` - increase controls size
+- `-` or `_` - decrease controls size
+- `Control` - toggle snap mode, so position, rotation or scale can be changed with a predefined step
+- `Escape` - reset, detach controls from selected object
 
 
 ## Installation
