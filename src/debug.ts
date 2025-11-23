@@ -23,7 +23,7 @@ export type DebugParams = {
     scene: Scene;
     camera: PerspectiveCamera;
     canvas: HTMLCanvasElement;
-    props: Partial<Options>;
+    options: Partial<Options>;
 };
 
 export type CustomComponent = {
@@ -55,7 +55,7 @@ export class Debug {
         };
     }
 
-    init({ scene, canvas, camera, props = {} }: DebugParams) {
+    init({ scene, canvas, camera, options = {} }: DebugParams) {
         if (this.panel) {
             return;
         }
@@ -63,7 +63,7 @@ export class Debug {
         this.scene = scene;
         this.canvas = canvas;
         this.camera = camera;
-        this.options = { ...this.options, ...props };
+        this.options = { ...this.options, ...options };
 
         this.panel = new GUI({ width: 100, title: 'Debug' });
         this.panel.domElement.setAttribute('id', 'debug-panel');
