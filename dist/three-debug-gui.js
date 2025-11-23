@@ -254,7 +254,7 @@ class L {
       orbit: !1
     };
   }
-  init({ scene: e, canvas: t, camera: o, props: n = {} }) {
+  init({ scene: e, canvas: t, camera: o, options: n = {} }) {
     if (!this.panel) {
       this.scene = e, this.canvas = t, this.camera = o, this.options = { ...this.options, ...n }, this.panel = new r({ width: 100, title: "Debug" }), this.panel.domElement.setAttribute("id", "debug-panel"), this.components = {
         props: new T(this),

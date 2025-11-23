@@ -34,7 +34,7 @@ export declare class Debug {
     canvas: HTMLCanvasElement;
     camera: PerspectiveCamera;
     constructor();
-    init({ scene, canvas, camera, props }: DebugParams): void;
+    init({ scene, canvas, camera, options }: DebugParams): void;
     tweakPanelStyle(): void;
     createToggle(label: keyof Options): void;
     registerComponent({ label, instance, initialValue }: CustomComponent): void;
@@ -84,7 +84,7 @@ declare type DebugParams = {
     scene: Scene;
     camera: PerspectiveCamera;
     canvas: HTMLCanvasElement;
-    props: Partial<Options>;
+    options: Partial<Options>;
 };
 
 declare class DebugSceneTree implements DebugComponent {
