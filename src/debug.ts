@@ -45,6 +45,7 @@ export class Debug {
     scene!: Scene;
     canvas!: HTMLCanvasElement;
     camera!: PerspectiveCamera;
+    enabled = false;
 
     constructor() {
         this.options = {
@@ -85,6 +86,7 @@ export class Debug {
         }
 
         this.tweakPanelStyle();
+        this.enabled = true;
     }
 
     tweakPanelStyle() {
@@ -147,7 +149,11 @@ export class Debug {
         console.log('scale:    ', target.scale);
     }
 
-    update(dt: number) {
+    update(dt: number): void {
+        if (!this.enabled) {
+            return;
+        }
+
         this.components.orbit.update?.(dt);
         this.components.physics?.update?.();
     }
