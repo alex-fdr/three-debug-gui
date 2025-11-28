@@ -246,6 +246,7 @@ class L {
   scene;
   canvas;
   camera;
+  enabled = !1;
   constructor() {
     this.options = {
       scene: !1,
@@ -264,7 +265,7 @@ class L {
       };
       for (const s of Object.keys(this.options))
         this.createToggle(s), this.options[s] && this.components[s].action?.();
-      this.tweakPanelStyle();
+      this.tweakPanelStyle(), this.enabled = !0;
     }
   }
   tweakPanelStyle() {
@@ -302,7 +303,7 @@ class L {
 `), console.log("target:   ", e), console.log("position: ", e.position), console.log("rotation: ", e.rotation), console.log("scale:    ", e.scale));
   }
   update(e) {
-    this.components.orbit.update?.(e), this.components.physics?.update?.();
+    this.enabled && (this.components.orbit.update?.(e), this.components.physics?.update?.());
   }
 }
 const Y = new L();

@@ -33,6 +33,7 @@ export declare class Debug {
     scene: Scene;
     canvas: HTMLCanvasElement;
     camera: PerspectiveCamera;
+    enabled: boolean;
     constructor();
     init({ scene, canvas, camera, options }: DebugParams): void;
     tweakPanelStyle(): void;
