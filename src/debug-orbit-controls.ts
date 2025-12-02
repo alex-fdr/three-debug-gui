@@ -9,7 +9,7 @@ export class DebugOrbitControls implements DebugComponent {
         this.context = context;
     }
 
-    action() {
+    init() {
         const { camera, canvas } = this.context;
         this.controls = new OrbitControls(camera, canvas);
         this.controls.update();
@@ -17,7 +17,7 @@ export class DebugOrbitControls implements DebugComponent {
 
     toggle(status: boolean) {
         if (!this.controls) {
-            this.action();
+            this.init();
         }
 
         this.controls.enabled = status;

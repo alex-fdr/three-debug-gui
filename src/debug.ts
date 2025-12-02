@@ -6,7 +6,7 @@ import { DebugSceneTree } from './debug-scene-tree.ts';
 import { DebugTransform } from './debug-transform.ts';
 
 export interface DebugComponent {
-    action?(target?: Object3D): void;
+    init?(target?: Object3D): void;
     toggle(status: boolean): void;
     update?(dt?: number): void;
 }
@@ -81,7 +81,7 @@ export class Debug {
 
             // perform control's action if it is enabled by default
             if (this.options[label]) {
-                this.components[label].action?.();
+                this.components[label].init?.();
             }
         }
 
@@ -121,19 +121,19 @@ export class Debug {
         this.createToggle(label);
 
         if (initialValue === true) {
-            instance.action?.();
+            instance.init?.();
         }
     }
 
     onSceneAction(target: Object3D) {
-        this.components.props.action(target);
+        this.components.props.init(target);
         this.components.transform.controls?.attach(target);
         this.logObject(target);
     }
 
     onTransformAction(target: Object3D) {
         // show props panel for the selected object
-        this.components.props.action(target);
+        this.components.props.init(target);
         this.logObject(target);
     }
 

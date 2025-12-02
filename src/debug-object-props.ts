@@ -1,26 +1,21 @@
+// biome-ignore assist/source/organizeImports: custom formatting for imports
 import GUI from 'lil-gui';
+import type { Debug, DebugComponent } from './debug';
+import type { Color, Light, Material, Mesh, Object3D, Side, Wrapping } from 'three';
 import {
     BackSide,
-    ClampToEdgeWrapping,
-    type Color,
     DoubleSide,
     FrontSide,
-    type Light,
-    type Material,
-    type Mesh,
     MeshBasicMaterial,
     MeshLambertMaterial,
     MeshPhongMaterial,
     MeshStandardMaterial,
+    ClampToEdgeWrapping,
     MirroredRepeatWrapping,
-    type Object3D,
     RepeatWrapping,
-    type Side,
-    type Wrapping,
 } from 'three';
-import type { Debug } from './debug';
 
-export class DebugObjectProps {
+export class DebugObjectProps implements DebugComponent {
     context: Debug;
     panel!: GUI;
     private activeObjectUuid = '';
@@ -44,13 +39,13 @@ export class DebugObjectProps {
 
     toggle(status: boolean) {
         if (!this.panel) {
-            this.action();
+            this.init();
         }
 
         this.panel.show(status);
     }
 
-    action(target?: Object3D) {
+    init(target?: Object3D) {
         if (!this.context.options.props) {
             return;
         }

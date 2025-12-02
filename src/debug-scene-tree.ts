@@ -13,7 +13,7 @@ export class DebugSceneTree implements DebugComponent {
         this.context = context;
     }
 
-    action() {
+    init() {
         this.panel = new GUI({ title: 'Scene Tree', width: 200 });
         this.panel.domElement.style.right = '0px';
 
@@ -74,7 +74,7 @@ export class DebugSceneTree implements DebugComponent {
 
     toggle(status: boolean) {
         if (!this.panel) {
-            this.action();
+            this.init();
         }
 
         this.panel.show(status);

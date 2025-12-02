@@ -16,7 +16,7 @@ export class DebugTransform implements DebugComponent {
         this.context = context;
     }
 
-    action() {
+    init() {
         const { camera, canvas, scene, components } = this.context;
 
         this.controls = new TransformControls(camera, canvas);
@@ -141,7 +141,7 @@ export class DebugTransform implements DebugComponent {
 
     toggle(status: boolean) {
         if (!this.controls) {
-            this.action();
+            this.init();
         }
 
         this.controls.enabled = status;
