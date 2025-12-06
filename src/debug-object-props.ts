@@ -21,10 +21,12 @@ type TexturedObject = {
     map?: Texture;
 };
 
+type CustomHandler = (target: Object3D, panel: GUI) => void;
+
 export class DebugObjectProps implements DebugComponent {
     context: Debug;
     panel!: GUI;
-    customHandler?: (target: Object3D, panel: GUI) => void;
+    customHandler?: CustomHandler;
     title = 'Object Props';
     private activeObjectUuid = '';
 
