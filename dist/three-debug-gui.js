@@ -1,10 +1,11 @@
 import r from "lil-gui";
-import { DoubleSide as l, BackSide as d, FrontSide as p, MeshLambertMaterial as f, MeshBasicMaterial as u, MeshPhongMaterial as m, MeshStandardMaterial as w, MirroredRepeatWrapping as g, RepeatWrapping as b, ClampToEdgeWrapping as x, Raycaster as S, Vector2 as y } from "three";
+import { DoubleSide as c, BackSide as d, FrontSide as p, MeshLambertMaterial as f, MeshBasicMaterial as u, MeshPhongMaterial as m, MeshStandardMaterial as w, MirroredRepeatWrapping as g, RepeatWrapping as b, ClampToEdgeWrapping as x, Raycaster as S, Vector2 as y } from "three";
 import { OrbitControls as P } from "three/addons/controls/OrbitControls";
 import { TransformControls as C } from "three/addons/controls/TransformControls";
 class T {
   context;
   panel;
+  customHandler;
   activeObjectUuid = "";
   constructor(e) {
     this.context = e;
@@ -16,9 +17,9 @@ class T {
     this.panel || (this.panel = this.createPanel(), this.panel.hide()), this.panel.domElement.style.right = e ? "200px" : "0px";
   }
   toggle(e) {
-    this.panel || this.action(), this.panel.show(e);
+    this.panel || this.init(), this.panel.show(e);
   }
-  action(e) {
+  init(e) {
     if (!this.context.options.props || (this.panel || (this.panel = this.createPanel(), this.panel.close(), this.adjustPlacement(this.context.options.scene === !0)), !e))
       return;
     if (this.activeObjectUuid === e.uuid) {
@@ -39,18 +40,18 @@ class T {
   }
   parseObject(e) {
     if ("isLight" in e && this.showLightProps(e), "material" in e) {
-      const { material: t } = e, o = Array.isArray(t) ? t : [t];
-      for (const [n, s] of o.entries())
-        this.showMaterialProps(e, s, n);
+      const { material: t } = e, n = Array.isArray(t) ? t : [t];
+      for (const [o, s] of n.entries())
+        this.showMaterialProps(e, s, o);
     }
-    e.children.length && this.showGroupProps(e);
+    e.children.length && this.showGroupProps(e), this.customHandler?.(e, this.panel);
   }
   showLightProps(e) {
     this.handleColor(this.panel, e, "color"), this.handleColor(this.panel, e, "groundColor"), this.panel.add(e, "intensity", 0, 3, 0.1);
   }
-  showMaterialProps(e, t, o) {
-    const n = o > 0 ? `Material${o}` : "Material", s = this.panel.addFolder(n);
-    s.add(t, "type"), s.add(e, "visible"), this.handleColor(s, t, "color"), this.handleColor(s, t, "emissive"), this.handleColor(s, t, "specular"), s.add(t, "transparent"), s.add(t, "opacity", 0, 1), s.add(t, "side", { FrontSide: p, BackSide: d, DoubleSide: l }).onChange((a) => {
+  showMaterialProps(e, t, n) {
+    const o = n > 0 ? `Material${n}` : "Material", s = this.panel.addFolder(o);
+    s.add(t, "type"), s.add(e, "visible"), this.handleColor(s, t, "color"), this.handleColor(s, t, "emissive"), this.handleColor(s, t, "specular"), s.add(t, "transparent"), s.add(t, "opacity", 0, 1), s.add(t, "side", { FrontSide: p, BackSide: d, DoubleSide: c }).onChange((a) => {
       t.side = a;
     }), (t instanceof f || t instanceof u || t instanceof m || t instanceof w) && (Object.hasOwn(t, "wireframe") && s.add(t, "wireframe"), t.color?.getHex() && (this.handleFunction(
       s,
@@ -63,30 +64,30 @@ class T {
     )), this.showMaterialTextureProps(s, t));
   }
   showMaterialTextureProps(e, t) {
-    const o = e.addFolder("Texture"), n = t.map;
-    n && (o.add(n, "flipY"), o.add(n, "rotation").min(0).max(Math.PI * 2).step(0.01), o.add(n.offset, "x").name("offsetX").min(0).max(1).step(0.01), o.add(n.offset, "y").name("offsetY").min(0).max(1).step(0.01), o.add(n.repeat, "x").name("repeatX"), o.add(n.repeat, "y").name("repeatY"), o.add(n, "wrapS", {
+    const n = e.addFolder("Texture"), o = t.map;
+    o && (n.add(o, "flipY"), n.add(o, "rotation").min(0).max(Math.PI * 2).step(0.01), n.add(o.offset, "x").name("offsetX").min(0).max(1).step(0.01), n.add(o.offset, "y").name("offsetY").min(0).max(1).step(0.01), n.add(o.repeat, "x").name("repeatX"), n.add(o.repeat, "y").name("repeatY"), n.add(o, "wrapS", {
       ClampToEdgeWrapping: x,
       RepeatWrapping: b,
       MirroredRepeatWrapping: g
     }).onChange((s) => {
-      n.wrapS = s, n.wrapT = s, n.needsUpdate = !0;
+      o.wrapS = s, o.wrapT = s, o.needsUpdate = !0;
     }).name("wrap"));
   }
   showGroupProps(e) {
     this.panel.add(e, "visible");
   }
   // biome-ignore lint/suspicious/noExplicitAny: Have no idea how to get rid off 'any' here
-  handleColor(e, t, o) {
-    if (!t[o])
+  handleColor(e, t, n) {
+    if (!t[n])
       return;
-    const n = {
-      [o]: t[o].getHex()
+    const o = {
+      [n]: t[n].getHex()
     };
-    e.addColor(n, o).onChange((s) => t[o].set(s));
+    e.addColor(o, n).onChange((s) => t[n].set(s));
   }
-  handleFunction(e, t, o) {
-    const n = { fn: () => o() };
-    e.add(n, "fn").name(t);
+  handleFunction(e, t, n) {
+    const o = { fn: () => n() };
+    e.add(o, "fn").name(t);
   }
 }
 class v {
@@ -95,12 +96,12 @@ class v {
   constructor(e) {
     this.context = e;
   }
-  action() {
+  init() {
     const { camera: e, canvas: t } = this.context;
     this.controls = new P(e, t), this.controls.update();
   }
   toggle(e) {
-    this.controls || this.action(), this.controls.enabled = e;
+    this.controls || this.init(), this.controls.enabled = e;
   }
   update(e) {
     this.controls?.update(e);
@@ -115,7 +116,7 @@ class M {
   constructor(e) {
     this.context = e;
   }
-  action() {
+  init() {
     this.panel = new r({ title: "Scene Tree", width: 200 }), this.panel.domElement.style.right = "0px", this.lightsFolder = this.panel.addFolder("Lights"), this.tweakPanelStyle();
     for (const e of this.context.scene.children)
       this.traverseScene(e, this.panel);
@@ -138,18 +139,18 @@ class M {
         `, document.head.appendChild(e);
   }
   traverseScene(e, t) {
-    const o = e.name !== "" ? e.name : e.type;
-    if (this.exclude.includes(o))
+    const n = e.name !== "" ? e.name : e.type;
+    if (this.exclude.includes(n))
       return;
-    const n = "isLight" in e && e.isLight, s = "isMesh" in e && e.isMesh, h = (n ? this.lightsFolder : t).addFolder(o);
+    const o = "isLight" in e && e.isLight, s = "isMesh" in e && e.isMesh, h = (o ? this.lightsFolder : t).addFolder(n);
     h.domElement.querySelector(".lil-title")?.addEventListener("click", () => {
       this.context.onSceneAction?.(e);
-    }), (this.keepClosed.includes(o) || n || s) && h.close();
-    for (const c of e.children)
-      this.traverseScene(c, h);
+    }), (this.keepClosed.includes(n) || o || s) && h.close();
+    for (const l of e.children)
+      this.traverseScene(l, h);
   }
   toggle(e) {
-    this.panel || this.action(), this.panel.show(e), this.context.components.props.adjustPlacement(e);
+    this.panel || this.init(), this.panel.show(e), this.context.components.props.adjustPlacement(e);
   }
 }
 class k {
@@ -163,11 +164,11 @@ class k {
   constructor(e) {
     this.context = e;
   }
-  action() {
-    const { camera: e, canvas: t, scene: o, components: n } = this.context;
+  init() {
+    const { camera: e, canvas: t, scene: n, components: o } = this.context;
     this.controls = new C(e, t);
     const s = this.controls.getHelper();
-    s.name = "transform-controls", o.add(s), this.selectable = o.children.filter(({ name: a }) => a !== s.name), this.bindEvents(n.orbit);
+    s.name = "transform-controls", n.add(s), this.selectable = n.children.filter(({ name: a }) => a !== s.name), this.bindEvents(o.orbit);
   }
   bindEvents(e) {
     this.controls.addEventListener("mouseUp", () => {
@@ -179,8 +180,8 @@ class k {
     }), window.addEventListener("keyup", ({ key: s }) => {
       s === "Shift" && (this.isShiftPressed = !1);
     });
-    const t = "ontouchstart" in document.documentElement, o = window.navigator.maxTouchPoints >= 1, n = t || o ? "touchstart" : "mousedown";
-    window.addEventListener(n, (s) => {
+    const t = "ontouchstart" in document.documentElement, n = window.navigator.maxTouchPoints >= 1, o = t || n ? "touchstart" : "mousedown";
+    window.addEventListener(o, (s) => {
       this.handleClick(s instanceof TouchEvent ? s.changedTouches[0] : s);
     });
   }
@@ -236,7 +237,7 @@ class k {
     t?.object && (this.controls.attach(t.object), this.context.onTransformAction?.(t.object));
   }
   toggle(e) {
-    this.controls || this.action(), this.controls.enabled = e, this.controls.detach();
+    this.controls || this.init(), this.controls.enabled = e, this.controls.detach();
   }
 }
 class L {
@@ -255,16 +256,16 @@ class L {
       orbit: !1
     };
   }
-  init({ scene: e, canvas: t, camera: o, options: n = {} }) {
+  init({ scene: e, canvas: t, camera: n, options: o = {} }) {
     if (!this.panel) {
-      this.scene = e, this.canvas = t, this.camera = o, this.options = { ...this.options, ...n }, this.panel = new r({ width: 100, title: "Debug" }), this.panel.domElement.setAttribute("id", "debug-panel"), this.components = {
+      this.scene = e, this.canvas = t, this.camera = n, this.options = { ...this.options, ...o }, this.panel = new r({ width: 100, title: "Debug" }), this.panel.domElement.setAttribute("id", "debug-panel"), this.components = {
         props: new T(this),
         orbit: new v(this),
         scene: new M(this),
         transform: new k(this)
       };
       for (const s of Object.keys(this.options))
-        this.createToggle(s), this.options[s] && this.components[s].action?.();
+        this.createToggle(s), this.options[s] && this.components[s].init?.();
       this.tweakPanelStyle(), this.enabled = !0;
     }
   }
@@ -285,18 +286,18 @@ class L {
       this.options[e] = t, this.components[e]?.toggle(t);
     });
   }
-  registerComponent({ label: e, instance: t, initialValue: o = !1 }) {
+  registerComponent({ label: e, instance: t, initialValue: n = !1 }) {
     if (Object.hasOwn(this.options, e)) {
       console.error(`a toggle with the name '${e}' already exists`);
       return;
     }
-    this.options[e] = o, this.components[e] = t, this.createToggle(e), o === !0 && t.action?.();
+    this.options[e] = n, this.components[e] = t, this.createToggle(e), n === !0 && t.init?.();
   }
   onSceneAction(e) {
-    this.components.props.action(e), this.components.transform.controls?.attach(e), this.logObject(e);
+    this.components.props.init(e), this.components.transform.controls?.attach(e), this.logObject(e);
   }
   onTransformAction(e) {
-    this.components.props.action(e), this.logObject(e);
+    this.components.props.init(e), this.logObject(e);
   }
   logObject(e) {
     e && (console.log(`

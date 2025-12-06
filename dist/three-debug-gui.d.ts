@@ -48,20 +48,21 @@ export declare class Debug {
 export declare const debug: Debug;
 
 export declare interface DebugComponent {
-    action?(target?: Object3D): void;
+    init?(target?: Object3D): void;
     toggle(status: boolean): void;
     update?(dt?: number): void;
 }
 
-declare class DebugObjectProps {
+declare class DebugObjectProps implements DebugComponent {
     context: Debug;
     panel: default_2;
+    customHandler?: (target: Object3D, panel: default_2) => void;
     private activeObjectUuid;
     constructor(context: Debug);
     createPanel(): default_2;
     adjustPlacement(visible: boolean): void;
     toggle(status: boolean): void;
-    action(target?: Object3D): void;
+    init(target?: Object3D): void;
     clearPanel(): void;
     parseObject(target: Object3D | Light | Mesh): void;
     showLightProps(target: Light): void;
@@ -76,7 +77,7 @@ declare class DebugOrbitControls implements DebugComponent {
     controls: OrbitControls;
     context: Debug;
     constructor(context: Debug);
-    action(): void;
+    init(): void;
     toggle(status: boolean): void;
     update(dt: number): void;
 }
@@ -95,7 +96,7 @@ declare class DebugSceneTree implements DebugComponent {
     private keepClosed;
     private lightsFolder;
     constructor(context: Debug);
-    action(): void;
+    init(): void;
     tweakPanelStyle(): void;
     traverseScene(object: Object3D | Light | Mesh, parentFolder: default_2): void;
     toggle(status: boolean): void;
@@ -110,7 +111,7 @@ declare class DebugTransform implements DebugComponent {
     pointer: Vector2;
     excludeTypes: string[];
     constructor(context: Debug);
-    action(): void;
+    init(): void;
     bindEvents(orbit: DebugOrbitControls): void;
     handleKeyPress(key: string, ctrl: TransformControls): void;
     handleClick(e: MouseEvent | Touch): void;
