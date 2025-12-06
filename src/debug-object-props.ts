@@ -1,24 +1,32 @@
 // biome-ignore assist/source/organizeImports: custom formatting for imports
 import GUI from 'lil-gui';
 import type { Debug, DebugComponent } from './debug';
-import type { Color, Light, Material, Mesh, Object3D, Side, Wrapping } from 'three';
+import type { Color, Light, Material, Mesh, Object3D, Side, Texture, Wrapping } from 'three';
 import {
     BackSide,
     DoubleSide,
     FrontSide,
-    MeshBasicMaterial,
-    MeshLambertMaterial,
-    MeshPhongMaterial,
-    MeshStandardMaterial,
     ClampToEdgeWrapping,
     MirroredRepeatWrapping,
     RepeatWrapping,
 } from 'three';
 
+type ColoredObject = {
+    color?: Color;
+    groundColor?: Color;
+    emissive?: Color;
+    specular?: Color;
+};
+
+type TexturedObject = {
+    map?: Texture;
+};
+
 export class DebugObjectProps implements DebugComponent {
     context: Debug;
     panel!: GUI;
     customHandler?: (target: Object3D, panel: GUI) => void;
+    title = 'Object Props';
     private activeObjectUuid = '';
 
     constructor(context: Debug) {
@@ -26,7 +34,7 @@ export class DebugObjectProps implements DebugComponent {
     }
 
     createPanel() {
-        return new GUI({ title: 'Object Props', width: 200 });
+        return new GUI({ title: this.title, width: 200 });
     }
 
     adjustPlacement(visible: boolean) {
@@ -119,7 +127,7 @@ export class DebugObjectProps implements DebugComponent {
         this.panel.add(target, 'intensity', 0, 3, 0.1);
     }
 
-    showMaterialProps(target: Mesh, material: Material, materialId: number) {
+    showMaterialProps(target: Mesh, material: Material & ColoredObject, materialId: number) {
         const name = materialId > 0 ? `Material${materialId}` : 'Material';
         const folder = this.panel.addFolder(name);
         folder.add(material, 'type');
@@ -131,41 +139,27 @@ export class DebugObjectProps implements DebugComponent {
 
         folder.add(material, 'transparent');
         folder.add(material, 'opacity', 0, 1);
-        folder.add(material, 'side', { FrontSide, BackSide, DoubleSide }).onChange((val: Side) => {
-            material.side = val;
+        folder.add(material, 'side', { FrontSide, BackSide, DoubleSide }).onChange((s: Side) => {
+            material.side = s;
         });
 
-        if (
-            material instanceof MeshLambertMaterial ||
-            material instanceof MeshBasicMaterial ||
-            material instanceof MeshPhongMaterial ||
-            material instanceof MeshStandardMaterial
-        ) {
-            if (Object.hasOwn(material, 'wireframe')) {
-                folder.add(material, 'wireframe');
-            }
-
-            if (material.color?.getHex()) {
-                this.handleFunction(folder, 'LinearToSRGB', () =>
-                    material.color.convertLinearToSRGB(),
-                );
-                this.handleFunction(folder, 'SRGBToLinear', () =>
-                    material.color.convertSRGBToLinear(),
-                );
-            }
-
-            this.showMaterialTextureProps(folder, material);
+        if ('wireframe' in material) {
+            folder.add(material, 'wireframe');
         }
+
+        if ('color' in material && material.color?.getHex()) {
+            this.handleFunction(folder, 'LinearToSRGB', () =>
+                material.color?.convertLinearToSRGB(),
+            );
+            this.handleFunction(folder, 'SRGBToLinear', () =>
+                material.color?.convertSRGBToLinear(),
+            );
+        }
+
+        this.showMaterialTextureProps(folder, material);
     }
 
-    showMaterialTextureProps(
-        parent: GUI,
-        material:
-            | MeshLambertMaterial
-            | MeshBasicMaterial
-            | MeshPhongMaterial
-            | MeshStandardMaterial,
-    ) {
+    showMaterialTextureProps(parent: GUI, material: Material & TexturedObject) {
         const texture = material.map;
 
         if (!texture) {
@@ -202,16 +196,15 @@ export class DebugObjectProps implements DebugComponent {
         this.panel.add(target, 'visible');
     }
 
-    // biome-ignore lint/suspicious/noExplicitAny: Have no idea how to get rid off 'any' here
-    handleColor(parentFolder: GUI, target: any, key: string): void {
+    handleColor(parentFolder: GUI, target: ColoredObject, key: keyof typeof target) {
         if (!target[key]) {
             return;
         }
 
-        const colorProps = {
-            [key]: target[key].getHex(),
-        };
-        parentFolder.addColor(colorProps, key).onChange((color: Color) => target[key].set(color));
+        const value = target[key];
+        const colorProps = { [key]: value.getHex() };
+        const callback = (color: Color) => value.set(color);
+        parentFolder.addColor(colorProps, key).onChange(callback);
     }
 
     handleFunction(parentFolder: GUI, label: string, callback: () => void) {
