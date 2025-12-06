@@ -215,4 +215,8 @@ export class DebugObjectProps implements DebugComponent {
         const obj = { fn: () => callback() };
         parentFolder.add(obj, 'fn').name(label);
     }
+
+    attachCustomProps(target: Object3D, handler: (target: Object3D, panel: GUI) => void) {
+        handler(target, this.panel);
+    }
 }
