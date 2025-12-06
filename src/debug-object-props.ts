@@ -1,15 +1,14 @@
-// biome-ignore assist/source/organizeImports: custom formatting for imports
 import GUI from 'lil-gui';
-import type { Debug, DebugComponent } from './debug';
 import type { Color, Light, Material, Mesh, Object3D, Side, Texture, Wrapping } from 'three';
 import {
     BackSide,
+    ClampToEdgeWrapping,
     DoubleSide,
     FrontSide,
-    ClampToEdgeWrapping,
     MirroredRepeatWrapping,
     RepeatWrapping,
 } from 'three';
+import type { Debug, DebugComponent } from './debug';
 
 type ColoredObject = {
     color?: Color;
@@ -139,7 +138,9 @@ export class DebugObjectProps implements DebugComponent {
 
         folder.add(material, 'transparent');
         folder.add(material, 'opacity', 0, 1);
-        folder.add(material, 'side', { FrontSide, BackSide, DoubleSide }).onChange((s: Side) => {
+
+        const sides = { FrontSide, BackSide, DoubleSide };
+        folder.add(material, 'side', sides).onChange((s: Side) => {
             material.side = s;
         });
 
@@ -159,38 +160,30 @@ export class DebugObjectProps implements DebugComponent {
         this.showMaterialTextureProps(folder, material);
     }
 
+    // biome-ignore-start format: keep those folder.add calls as one-liners
     showMaterialTextureProps(parent: GUI, material: Material & TexturedObject) {
         const texture = material.map;
-
+        
         if (!texture) {
             return;
         }
-
+        
         const folder = parent.addFolder('Texture');
         folder.add(texture, 'flipY');
-        folder
-            .add(texture, 'rotation')
-            .min(0)
-            .max(Math.PI * 2)
-            .step(0.01);
-        folder.add(texture.offset, 'x').name('offsetX').min(0).max(1).step(0.01);
+        folder.add(texture, 'rotation').min(0).max(Math.PI * 2).step(0.01);
+        folder.add(texture.offset, 'x').name('offsetX').min(0.0).max(1).step(0.01);
         folder.add(texture.offset, 'y').name('offsetY').min(0).max(1).step(0.01);
         folder.add(texture.repeat, 'x').name('repeatX');
         folder.add(texture.repeat, 'y').name('repeatY');
 
-        folder
-            .add(texture, 'wrapS', {
-                ClampToEdgeWrapping,
-                RepeatWrapping,
-                MirroredRepeatWrapping,
-            })
-            .onChange((val: Wrapping) => {
-                texture.wrapS = val;
-                texture.wrapT = val;
-                texture.needsUpdate = true;
-            })
-            .name('wrap');
+        const wrapOptions = { RepeatWrapping, ClampToEdgeWrapping, MirroredRepeatWrapping };
+        folder.add(texture, 'wrapS', wrapOptions).name('wrap').onChange((val: Wrapping) => {
+            texture.wrapS = val;
+            texture.wrapT = val;
+            texture.needsUpdate = true;
+        });
     }
+    // biome-ignore-end format: end of a block with custom formatting
 
     showGroupProps(target: Object3D) {
         this.panel.add(target, 'visible');
