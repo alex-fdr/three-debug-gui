@@ -18,6 +18,7 @@ import {
 export class DebugObjectProps implements DebugComponent {
     context: Debug;
     panel!: GUI;
+    customHandler?: (target: Object3D, panel: GUI) => void;
     private activeObjectUuid = '';
 
     constructor(context: Debug) {
@@ -108,6 +109,8 @@ export class DebugObjectProps implements DebugComponent {
         if (target.children.length) {
             this.showGroupProps(target);
         }
+
+        this.customHandler?.(target, this.panel);
     }
 
     showLightProps(target: Light) {
@@ -214,9 +217,5 @@ export class DebugObjectProps implements DebugComponent {
     handleFunction(parentFolder: GUI, label: string, callback: () => void) {
         const obj = { fn: () => callback() };
         parentFolder.add(obj, 'fn').name(label);
-    }
-
-    attachCustomProps(target: Object3D, handler: (target: Object3D, panel: GUI) => void) {
-        handler(target, this.panel);
     }
 }
