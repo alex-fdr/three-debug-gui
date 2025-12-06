@@ -166,13 +166,13 @@ export class DebugObjectProps implements DebugComponent {
             | MeshPhongMaterial
             | MeshStandardMaterial,
     ) {
-        const folder = parent.addFolder('Texture');
         const texture = material.map;
 
         if (!texture) {
             return;
         }
 
+        const folder = parent.addFolder('Texture');
         folder.add(texture, 'flipY');
         folder
             .add(texture, 'rotation')
