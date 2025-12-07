@@ -1,10 +1,16 @@
 import GUI from 'lil-gui';
-import type { Light, Mesh, Object3D } from 'three';
+import type { Object3D } from 'three';
 import type { Debug, DebugComponent } from './debug';
+
+type SomeObject3D = Object3D & {
+    isMesh?: boolean;
+    isLight?: boolean;
+};
 
 export class DebugSceneTree implements DebugComponent {
     context: Debug;
     panel!: GUI;
+    title = 'Scene Tree';
     private exclude = ['transform-controls', 'TransformControlsGizmo'];
     private keepClosed = ['mixamorig_Hips'];
     private lightsFolder!: GUI;
@@ -14,7 +20,7 @@ export class DebugSceneTree implements DebugComponent {
     }
 
     init() {
-        this.panel = new GUI({ title: 'Scene Tree', width: 200 });
+        this.panel = new GUI({ title: this.title, width: 200 });
         this.panel.domElement.style.right = '0px';
 
         this.lightsFolder = this.panel.addFolder('Lights');
@@ -45,16 +51,14 @@ export class DebugSceneTree implements DebugComponent {
         document.head.appendChild(styleElement);
     }
 
-    traverseScene(object: Object3D | Light | Mesh, parentFolder: GUI) {
+    traverseScene(object: SomeObject3D, parentFolder: GUI) {
         const name = object.name !== '' ? object.name : object.type;
 
         if (this.exclude.includes(name)) {
             return;
         }
 
-        const isLight = 'isLight' in object && object.isLight;
-        const isMesh = 'isMesh' in object && object.isMesh;
-        const parent = isLight ? this.lightsFolder : parentFolder;
+        const parent = object.isLight ? this.lightsFolder : parentFolder;
         const folder = parent.addFolder(name);
         const clickArea = folder.domElement.querySelector('.lil-title');
 
@@ -62,7 +66,7 @@ export class DebugSceneTree implements DebugComponent {
             this.context.onSceneAction?.(object);
         });
 
-        if (this.keepClosed.includes(name) || isLight || isMesh) {
+        if (this.keepClosed.includes(name) || object.isLight || object.isMesh) {
             folder.close();
         }
 
