@@ -1,6 +1,6 @@
 import type { Object3D, PerspectiveCamera, Scene } from 'three';
 import { Pane } from 'tweakpane';
-// import { DebugObjectProps } from './debug-object-props.ts';
+import { DebugObjectProps } from './debug-object-props.ts';
 import { DebugOrbitControls } from './debug-orbit-controls.ts';
 import { DebugSceneTree } from './debug-scene-tree.ts';
 import { DebugTransform } from './debug-transform.ts';
@@ -36,7 +36,7 @@ export class Debug {
     options: Options;
     components!: {
         scene: DebugSceneTree;
-        // props: DebugObjectProps;
+        props: DebugObjectProps;
         transform: DebugTransform;
         orbit: DebugOrbitControls;
         [key: string]: DebugComponent;
@@ -66,15 +66,12 @@ export class Debug {
         this.camera = camera;
         this.options = { ...this.options, ...options };
 
-        this.panel = new Pane({
-            // width: 100,
-            title: 'Debug',
-        });
-        console.log(this.panel);
+        this.panel = new Pane({ title: 'Debug' });
         this.panel.element.parentElement?.setAttribute('id', 'debug-panel');
+        console.log(this.panel);
 
         this.components = {
-            // props: new DebugObjectProps(this),
+            props: new DebugObjectProps(this),
             orbit: new DebugOrbitControls(this),
             scene: new DebugSceneTree(this),
             transform: new DebugTransform(this),
@@ -89,29 +86,11 @@ export class Debug {
             }
         }
 
-        this.tweakPanelStyle();
         this.enabled = true;
-    }
-
-    tweakPanelStyle() {
-        const styleElement = document.createElement('style');
-        styleElement.textContent = `
-            #debug-panel {
-                top: 0;
-                left: 0;
-                position: fixed;
-            }
-
-            #debug-panel .tp-lblv_v {
-                width: 20%;
-            }
-        `;
-        document.head.appendChild(styleElement);
     }
 
     createToggle(label: keyof Options) {
         this.panel.addBinding(this.options, label).on('change', (event) => {
-            console.log('EVENT', event);
             if (typeof event.value === 'undefined') {
                 return;
             }
@@ -137,14 +116,14 @@ export class Debug {
     }
 
     onSceneAction(target: Object3D) {
-        /* this.components.props.init(target); */
+        this.components.props.init(target);
         this.components.transform.controls?.attach(target);
         this.logObject(target);
     }
 
     onTransformAction(target: Object3D) {
         // show props panel for the selected object
-        /* this.components.props.init(target); */
+        this.components.props.init(target);
         this.logObject(target);
     }
 

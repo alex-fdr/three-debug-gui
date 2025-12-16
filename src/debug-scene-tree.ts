@@ -21,7 +21,8 @@ export class DebugSceneTree implements DebugComponent {
 
     init() {
         this.panel = new Pane({ title: this.title });
-        this.panel.element.style.right = '0px';
+        this.panel.element.parentElement?.setAttribute('id', 'scene-panel');
+        // this.panel.element.style.right = '0px';
         // this.panel.element.style.width = '200px';
 
         this.lightsFolder = this.panel.addFolder({ title: 'Lights' });
@@ -61,14 +62,14 @@ export class DebugSceneTree implements DebugComponent {
 
         const parent = object.isLight ? this.lightsFolder : parentFolder;
         const folder = parent.addFolder({ title: name });
-        const clickArea = folder.element.querySelector('.lil-title');
 
-        clickArea?.addEventListener('click', () => {
+        folder.on('fold', (event) => {
             this.context.onSceneAction?.(object);
         });
 
         if (this.keepClosed.includes(name) || object.isLight || object.isMesh) {
             folder.expanded = false;
+            console.log('do not expand this shit', name);
         }
 
         // recursively traverse children of the current node
@@ -83,6 +84,6 @@ export class DebugSceneTree implements DebugComponent {
         }
 
         this.panel.expanded = status;
-        /* this.context.components.props.adjustPlacement(status); */
+        this.context.components.props.adjustPlacement(status);
     }
 }
