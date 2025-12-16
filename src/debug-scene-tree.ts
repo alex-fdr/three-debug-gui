@@ -1,5 +1,5 @@
-import GUI from 'lil-gui';
 import type { Object3D } from 'three';
+import { type FolderApi, Pane } from 'tweakpane';
 import type { Debug, DebugComponent } from './debug';
 
 type SomeObject3D = Object3D & {
@@ -9,21 +9,22 @@ type SomeObject3D = Object3D & {
 
 export class DebugSceneTree implements DebugComponent {
     context: Debug;
-    panel!: GUI;
+    panel!: Pane;
     title = 'Scene Tree';
     private exclude = ['transform-controls', 'TransformControlsGizmo'];
     private keepClosed = ['mixamorig_Hips'];
-    private lightsFolder!: GUI;
+    private lightsFolder!: FolderApi;
 
     constructor(context: Debug) {
         this.context = context;
     }
 
     init() {
-        this.panel = new GUI({ title: this.title, width: 200 });
-        this.panel.domElement.style.right = '0px';
+        this.panel = new Pane({ title: this.title });
+        this.panel.element.style.right = '0px';
+        // this.panel.element.style.width = '200px';
 
-        this.lightsFolder = this.panel.addFolder('Lights');
+        this.lightsFolder = this.panel.addFolder({ title: 'Lights' });
 
         this.tweakPanelStyle();
 
@@ -51,7 +52,7 @@ export class DebugSceneTree implements DebugComponent {
         document.head.appendChild(styleElement);
     }
 
-    traverseScene(object: SomeObject3D, parentFolder: GUI) {
+    traverseScene(object: SomeObject3D, parentFolder: Pane | FolderApi) {
         const name = object.name !== '' ? object.name : object.type;
 
         if (this.exclude.includes(name)) {
@@ -59,15 +60,15 @@ export class DebugSceneTree implements DebugComponent {
         }
 
         const parent = object.isLight ? this.lightsFolder : parentFolder;
-        const folder = parent.addFolder(name);
-        const clickArea = folder.domElement.querySelector('.lil-title');
+        const folder = parent.addFolder({ title: name });
+        const clickArea = folder.element.querySelector('.lil-title');
 
         clickArea?.addEventListener('click', () => {
             this.context.onSceneAction?.(object);
         });
 
         if (this.keepClosed.includes(name) || object.isLight || object.isMesh) {
-            folder.close();
+            folder.expanded = false;
         }
 
         // recursively traverse children of the current node
@@ -81,7 +82,7 @@ export class DebugSceneTree implements DebugComponent {
             this.init();
         }
 
-        this.panel.show(status);
-        this.context.components.props.adjustPlacement(status);
+        this.panel.expanded = status;
+        /* this.context.components.props.adjustPlacement(status); */
     }
 }

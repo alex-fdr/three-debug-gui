@@ -15,10 +15,10 @@ export default defineConfig({
                 'three',
                 'three/addons/controls/OrbitControls',
                 'three/addons/controls/TransformControls',
-                'lil-gui',
+                'tweakpane',
             ],
         },
         reportCompressedSize: false,
     },
-    plugins: [dts({ rollupTypes: true })],
+    // plugins: [dts({ rollupTypes: true })],
 });
