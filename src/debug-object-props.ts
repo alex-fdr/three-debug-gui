@@ -116,7 +116,7 @@ export class DebugObjectProps implements DebugComponent {
     }
 
     parseObject(target: Object3D | Light | Mesh) {
-        console.log('parse object', target);
+        this.panel.addBinding(target, 'type');
 
         if ('isLight' in target) {
             this.showLightProps(target);
@@ -129,6 +129,10 @@ export class DebugObjectProps implements DebugComponent {
             for (const [i, mat] of materials.entries()) {
                 this.showMaterialProps(target, mat, i);
             }
+        }
+
+        if ('position' in target) {
+            this.showTransformProps(target);
         }
 
         if (target.children.length) {
@@ -219,6 +223,16 @@ export class DebugObjectProps implements DebugComponent {
 
     showGroupProps(target: Object3D) {
         this.panel.addBinding(target, 'visible');
+    }
+
+    showTransformProps(target: Object3D) {
+        const params = {
+            format: (v: number) => v.toFixed(2),
+        };
+        const folder = this.panel.addFolder({ title: 'Transform' });
+        folder.addBinding(target, 'position', params);
+        folder.addBinding(target, 'rotation', params);
+        folder.addBinding(target, 'scale', params);
     }
 
     handleColor(parentFolder: Pane | FolderApi, target: ColoredObject, key: keyof typeof target) {

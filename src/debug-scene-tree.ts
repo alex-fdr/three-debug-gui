@@ -22,35 +22,12 @@ export class DebugSceneTree implements DebugComponent {
     init() {
         this.panel = new Pane({ title: this.title });
         this.panel.element.parentElement?.setAttribute('id', 'scene-panel');
-        // this.panel.element.style.right = '0px';
-        // this.panel.element.style.width = '200px';
 
         this.lightsFolder = this.panel.addFolder({ title: 'Lights' });
-
-        this.tweakPanelStyle();
 
         for (const child of this.context.scene.children) {
             this.traverseScene(child, this.panel);
         }
-    }
-
-    tweakPanelStyle() {
-        const styleElement = document.createElement('style');
-        styleElement.textContent = `
-            .lil-gui {
-                --folder-indent: 8px;
-            }
-            .lil-title:has(+ .lil-children:empty)::before {
-                content: '';
-            }
-            .lil-title ~ .lil-children:empty {
-                display: none;
-            }
-            .lil-gui .lil-title:before {
-                display: inline;
-            }
-        `;
-        document.head.appendChild(styleElement);
     }
 
     traverseScene(object: SomeObject3D, parentFolder: Pane | FolderApi) {
@@ -63,13 +40,22 @@ export class DebugSceneTree implements DebugComponent {
         const parent = object.isLight ? this.lightsFolder : parentFolder;
         const folder = parent.addFolder({ title: name });
 
-        folder.on('fold', (event) => {
+        folder.controller.view.buttonElement.removeEventListener(
+            'click',
+            folder.controller.onTitleClick_,
+        );
+        folder.controller.view.buttonElement.children[1].addEventListener(
+            'click',
+            folder.controller.onTitleClick_,
+        );
+
+        folder.controller.view.titleElement.addEventListener('click', (e) => {
+            e.preventDefault();
             this.context.onSceneAction?.(object);
         });
 
         if (this.keepClosed.includes(name) || object.isLight || object.isMesh) {
             folder.expanded = false;
-            console.log('do not expand this shit', name);
         }
 
         // recursively traverse children of the current node

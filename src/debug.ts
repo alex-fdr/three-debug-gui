@@ -124,6 +124,7 @@ export class Debug {
     onTransformAction(target: Object3D) {
         // show props panel for the selected object
         this.components.props.init(target);
+        this.components.props.panel.refresh();
         this.logObject(target);
     }
 
