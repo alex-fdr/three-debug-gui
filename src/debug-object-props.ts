@@ -26,7 +26,7 @@ type CustomHandler = (target: Object3D, panel: GUI) => void;
 export class DebugObjectProps implements DebugComponent {
     context: Debug;
     panel!: GUI;
-    customHandler?: CustomHandler;
+    customHandlers: CustomHandler[] = [];
     title = 'Object Props';
     private activeObjectUuid = '';
 
@@ -119,7 +119,9 @@ export class DebugObjectProps implements DebugComponent {
             this.showGroupProps(target);
         }
 
-        this.customHandler?.(target, this.panel);
+        for (const handler of this.customHandlers) {
+            handler(target, this.panel);
+        }
     }
 
     showLightProps(target: Light) {
@@ -205,5 +207,9 @@ export class DebugObjectProps implements DebugComponent {
     handleFunction(parentFolder: GUI, label: string, callback: () => void) {
         const obj = { fn: () => callback() };
         parentFolder.add(obj, 'fn').name(label);
+    }
+
+    addCustomHandler(handler: CustomHandler) {
+        this.customHandlers.push(handler);
     }
 }
