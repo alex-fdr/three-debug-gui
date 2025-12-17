@@ -23,7 +23,7 @@ export default defineConfig({
         reportCompressedSize: false,
     },
     plugins: [
-        // dts({ rollupTypes: true }),
+        dts({ rollupTypes: true }),
         cssInjectedByJsPlugin()
     ],
 });
