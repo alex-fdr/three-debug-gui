@@ -52,7 +52,7 @@ debug.init({
     scene: threeScene,
     camera: threeCamera,
     canvas: threeRenderer.domElement,
-    props: {
+    options: {
         scene: true,
         props: true,
         orbit: true,
